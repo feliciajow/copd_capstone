@@ -61,20 +61,19 @@ X_test = X_test.drop(columns=["Patient ID"])
 rsf = RandomSurvivalForest(n_estimators=100, min_samples_split=10, min_samples_leaf=15, max_features="sqrt", n_jobs=-1, random_state=42)
 rsf.fit(X_train, y_train)
 
-true_positive = np.random.randint(50, 100)
-true_negative = np.random.randint(50, 100)
-false_positive = np.random.randint(0, 20)
-false_negative = np.random.randint(0, 20)
+c_index = rsf.score(X_test, y_test)
+print(f"Concordance Index: {c_index:.3f}")
+c_index = round(float(c_index),3)
 
 #Serialize model using pickle to store in DB
 model_binary = pickle.dumps(rsf)
 
 #Insert model into PostgreSQL
 cur.execute("""
-    INSERT INTO models (true_positive, true_negative, false_positive, false_negative, timestamp, model_data)
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO models (timestamp, model_data, c_index)
+    VALUES (%s, %s, %s)
     RETURNING modelid;
-""", (true_positive, true_negative, false_positive, false_negative, datetime.now(), model_binary))
+""", (datetime.now(), model_binary, c_index))
 
 #Retrieve the new modelid
 modelid = cur.fetchone()[0]

@@ -103,7 +103,7 @@ app.get("/model", async (req, res) => {
   try {
     const result = await client.query(
 
-      `Select m.modelid, m.true_positive, m.false_positive, m.true_negative, m.false_negative, m.timestamp 
+      `Select m.modelid, m.c_index, m.timestamp 
       From models m`
     );
     if (result.rows.length === 0) {

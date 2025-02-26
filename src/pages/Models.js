@@ -60,42 +60,14 @@ const Models = ({ email }) => {
             fixed: 'left',
         },
         {
-            title: 'True Positive',
-            dataIndex: 'true_positive',
-            key: 'true_positive',
+            title: 'C_Index',
+            dataIndex: 'c_index',
+            key: 'c_index',
             width: '15%',
             sorter: {
-                compare: (a, b) => a.true_positive - b.true_positive,
+                compare: (a, b) => a.c_index - b.c_index,
             },
-        },
-        {
-            title: 'True Negative',
-            dataIndex: 'true_negative',
-            key: 'true_negative',
-            width: '15%',
-            sorter: {
-                compare: (a, b) => a.true_negative - b.true_negative,
-            },
-            ...getColumnSearchProps('true_negative'),
-        },
-        {
-            title: 'False Positive',
-            dataIndex: 'false_positive',
-            key: 'false_positive',
-            width: '15%',
-            sorter: {
-                compare: (a, b) => a.false_positive - b.false_positive,
-            },
-            ...getColumnSearchProps('false_positive'),
-        },
-        {
-            title: 'False Negative',
-            dataIndex: 'false_negative',
-            key: 'false_negative',
-            width: '15%',
-            sorter: {
-                compare: (a, b) => a.false_negative - b.false_negative,
-            },
+            ...getColumnSearchProps('c_index'),
         },
         {
             title: 'Created at',
@@ -145,7 +117,7 @@ const Models = ({ email }) => {
     return (
         <div>
             <br />
-            {alert}
+            <div className = "alerts" style={{ padding: '1%' }}>{alert}</div>
             {!email ? (
                 <Alert description="You have to login to your account to view models." type="info" showIcon />
             ) : (

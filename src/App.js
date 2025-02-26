@@ -21,7 +21,7 @@ function Header({email, handleLogin}) {
         <button className="dashboard-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
         <button className="retrain-btn" onClick={() => navigate('/retrain')}>Retrain</button>
         <button className="models-btn" onClick={() => navigate('/models')}>Models</button>
-        {email} 
+        <div className="email">{email}</div> 
         <button className="login-btn" onClick={() => {
           if (email){
             handleLogin(null);

@@ -2,7 +2,12 @@
   text-align: center;
 }
 body{
-  background: linear-gradient(120deg, #f7faff, #eaf0f5);
+  background: url("../public/backgroundcolor.jpg") no-repeat;
+  /* background-color: gold; */
+  /* background-image: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%); */
+  background-size: cover;
+  overflow: scroll;
+
 }
 /* .App-logo {
   height: 40vmin;
@@ -44,12 +49,12 @@ body{
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
-  font-family: Arial, sans-serif;
+  font-family: Georgia, 'Times New Roman', Times, serif;
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: white;
+  background-image: linear-gradient(to right, #1e3c72, #2a5298);
 }
 
 .navbar-left {
@@ -64,8 +69,9 @@ body{
   object-fit: contain; /* Ensure the image fits within the dimensions while maintaining aspect ratio */
   cursor: pointer;
   font-size: 18px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-weight: bold;
-  color: #333333;
+  color: white;
 }
 
 .navbar-right {
@@ -81,14 +87,14 @@ body{
   font-weight: bold;
   padding: 12px 25px;
   font-size: 16px;
-  color: white;
-  border: none;
+  color: black;
+  border-color: black;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease;
   white-space: nowrap;
-  background-color:#29b6f6;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  background-color: #fbfbfb;
+  box-shadow: rgba(255, 255, 255, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
 }
 .login-btn:hover {
   opacity: 0.9; /* Subtle hover effect */
@@ -98,14 +104,20 @@ body{
 .dashboard-btn,
 .retrain-btn,
 .models-btn{
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   padding: 8px 16px;
   font-weight: 500;
-  font-size: 17px;
+  font-size: 25px;
   background: transparent;
   border: none;
-  color: black;
+  color: white;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s ease;
+}
+
+.email{
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color:white;
+  font-size: 25px
 }

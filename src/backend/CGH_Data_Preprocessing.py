@@ -424,9 +424,9 @@ def train():
     data_y = df.apply(lambda row: (row["Dead"] == 1, row["Survival Duration (Days)"]), axis=1).to_numpy(dtype=[("Dead", "?"), ("Survival Duration (Days)", "<f8")])
 
     # # Define predictor variables
-    exclude_columns = ["Patient ID", "Dead", "Survival Duration (Days)","Readmission", "Gender", "Age"]
+    exclude_columns = ["Patient ID", "Dead", "Survival Duration (Days)","Readmission", "Gender", "Age", "Death in 12 Months", "Readmission in 12 Months", "Readmission in 6 Months"]
     diagnostic_codes = [col for col in df.columns if col not in exclude_columns]
-    X = df.drop(columns=["Dead", "Survival Duration (Days)"])
+    X = df.drop(columns=["Patient ID", "Dead", "Survival Duration (Days)"])
 
     #Save the diagnostic codes in database 
     # Clearing existing codes to avoid duplicates
@@ -439,32 +439,32 @@ def train():
     X_train, X_test, y_train, y_test = train_test_split(X, data_y, test_size=0.2, random_state=42)
 
     # Store patient IDs separately for reference
-    if "Patient ID" in X_train.columns:
-        patient_ids_train = pd.DataFrame(X_train["Patient ID"])
-        patient_ids_test = pd.DataFrame(X_test["Patient ID"])
+    # if "Patient ID" in X_train.columns:
+    #     patient_ids_train = pd.DataFrame(X_train["Patient ID"])
+    #     patient_ids_test = pd.DataFrame(X_test["Patient ID"])
 
     # Drop Patient_ID before training
-    X_train = X_train.drop(columns=["Patient ID"])
-    X_test = X_test.drop(columns=["Patient ID"])
+    # X_train = X_train.drop(columns=["Patient ID"])
+    # X_test = X_test.drop(columns=["Patient ID"])
 
     #Train Random Survival Forest model
     rsf = RandomSurvivalForest(n_estimators=100, min_samples_split=10, min_samples_leaf=15, max_features="sqrt", n_jobs=-1, random_state=42)
     rsf.fit(X_train, y_train)
 
-    true_positive = np.random.randint(50, 100)
-    true_negative = np.random.randint(50, 100)
-    false_positive = np.random.randint(0, 20)
-    false_negative = np.random.randint(0, 20)
+    # Model evaluation
+    c_index = rsf.score(X_test, y_test)
+    print(f"Concordance Index: {c_index:.3f}")
+    c_index = round(float(c_index),3)
 
     #Serialize model using pickle to store in DB
     model_binary = pickle.dumps(rsf)
 
     #Insert model into PostgreSQL
     cur.execute("""
-        INSERT INTO models (true_positive, true_negative, false_positive, false_negative, timestamp, model_data)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO models (timestamp, model_data, c_index)
+        VALUES (%s, %s, %s)
         RETURNING modelid;
-    """, (true_positive, true_negative, false_positive, false_negative, datetime.now(), model_binary))
+    """, (datetime.now(), model_binary, c_index))
 
     #Retrieve the new modelid
     modelid = cur.fetchone()[0]

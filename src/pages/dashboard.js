@@ -70,10 +70,10 @@ const Dashboard = () => {
 
             setPrediction(response.data);
             // Reset form input after prediction
-            setGender('');
-            setAge('');
-            setTimesAdmitted('');
-            setSelectedCodes([]);  
+            // setGender('');
+            // setAge('');
+            // setTimesAdmitted('');
+            // setSelectedCodes([]);  
         } catch (error) {
             alert(error.response?.data?.error || "Error making prediction");
         } finally {
@@ -143,11 +143,11 @@ const Dashboard = () => {
                             <h3>Estimated Readmission</h3>
                             <div className="metric-cards">
                                 <div className="probability">
-                                    <h3>1 year</h3>
+                                    <h3>30 days</h3>
                                     <p>{prediction?.readmission_1_year ? `${(prediction.readmission_1_year * 100).toFixed(1)}%` : "N/A"}</p>
                                 </div>
                                 <div className="probability">
-                                    <h3>5 year</h3>
+                                    <h3>60 days</h3>
                                     <p>{prediction?.readmission_5_year ? `${(prediction.readmission_5_year * 100).toFixed(1)}%` : "N/A"}</p>
                                 </div>
                             </div>
@@ -256,8 +256,47 @@ const Dashboard = () => {
                                     margin: { t: 70, l: 100, r: 40, b: 80 },
                                 }}
                             />
-                            </div>
                         {/* Readmission Probability Chart */}
+                        <div className="chart">
+                        <Plot
+                                data={survivalData.length > 0 ? [{
+                                    x: survivalData.map(d => d.days),
+                                    y: survivalData.map(d => d.Survival),
+                                    type: 'scatter',
+                                    mode: 'lines',
+                                    line: { width: 5 },
+                                    marker: { color: 'purple' }
+                                }] : []}
+                                layout={{
+                                    title: { 
+                                        text: 'Readmission Probability Curve', 
+                                        font: { size: 19 }, 
+                                        x: 0.5, 
+                                        xanchor: 'center'
+                                    },
+                                    xaxis: { 
+                                        title: { text: 'Time (Days)', font: { size: 17 } },
+                                        showgrid: true,
+                                        zeroline: true,
+                                    },
+                                    yaxis: { 
+                                        title: { text: 'Readmission Probability', font: { size: 17 } },
+                                        range: [0, 1],
+                                        showgrid: true,
+                                        zeroline: true,
+                                    },
+                                    annotations: survivalData.length === 0 ? [{
+                                        xref: 'paper', yref: 'paper',
+                                        x: 0.5, y: 0.5,
+                                        text: 'No data available',
+                                        showarrow: false,
+                                        font: { size: 20 }
+                                    }] : [],
+                                    margin: { t: 70, l: 100, r: 40, b: 80 },
+                                }}
+                            />
+                            </div>
+                            </div>
 
                         </div>
                     </div>
