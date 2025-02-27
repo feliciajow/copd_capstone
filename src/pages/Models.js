@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Table, Alert, Card, Badge, Row, Col, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,12 +6,7 @@ const Models = ({ email }) => {
     const [fetchModel, setfetchModel] = useState([]);
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState(null);
-    const [searchText, setSearchText] = useState('');
-    const [searchedColumn, setSearchedColumn] = useState('');
     const navigate = useNavigate();
-    const getColumnSearchProps = (dataIndex) => ({
-        
-    });
 
     useEffect(() => {
         if (email) {
@@ -51,7 +46,7 @@ const Models = ({ email }) => {
             });
     };
 
-    const columns = [
+    const columns = useMemo(() => [
         {
             title: 'Model ID',
             dataIndex: 'modelid',
@@ -76,7 +71,6 @@ const Models = ({ email }) => {
             sorter: {
                 compare: (a, b) => a.true_negative - b.true_negative,
             },
-            ...getColumnSearchProps('true_negative'),
         },
         {
             title: 'False Positive',
@@ -86,7 +80,6 @@ const Models = ({ email }) => {
             sorter: {
                 compare: (a, b) => a.false_positive - b.false_positive,
             },
-            ...getColumnSearchProps('false_positive'),
         },
         {
             title: 'False Negative',
@@ -140,7 +133,7 @@ const Models = ({ email }) => {
                 );
             },
         },
-    ];
+    ],[fetchModel]);
 
     return (
         <div>

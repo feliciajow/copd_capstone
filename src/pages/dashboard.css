@@ -136,7 +136,7 @@
       padding: 12px 25px;
       border-radius: 10px;
       height: 50px;
-      width: 100%;
+      width: 400px;
     }
   
     /* Chart section */
@@ -176,9 +176,9 @@
     
     .form-section .input-container,
     .form-section .input-field,
-    .form-section .predict-btn select {
-      width: 100%; 
-      max-width: 400px; 
+    .form-section select {
+      width: 400px; 
+      /* max-width: 400px;  */
       height: 60px; 
       box-sizing: border-box; /* Ensure padding and border are included in the width/height */
   }
