@@ -138,7 +138,10 @@ const PreviewFile = ({ file, proceed, prev }) => {
     <div>
       {error && <Alert message={error} type="error" showIcon />}
       {loading ? (
-        <Spin size="large" style={{ display: 'block', margin: '30px auto' }} />
+        <div className="loading">
+          <Spin size="large"/>
+          <h2>Please wait patiently while we check your uploaded file...</h2>
+        </div>
       ) : (
         <>
           {!error && (

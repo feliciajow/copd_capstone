@@ -2,11 +2,12 @@
   text-align: center;
 }
 body{
-  background: url("../public/backgroundcolor.jpg") no-repeat;
+  /* background: url("../public/backgroundcolor.jpg") no-repeat; */
+  background: url("../public/wickedbackground (1).png") no-repeat;
   /* background-color: gold; */
   /* background-image: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%); */
   background-size: cover;
-  overflow: scroll;
+  overflow-x: hidden;
 
 }
 /* .App-logo {
@@ -54,7 +55,7 @@ body{
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-image: linear-gradient(to right, #1e3c72, #2a5298);
+  background-image: linear-gradient(to right, #284780, #295297);
 }
 
 .navbar-left {
@@ -64,8 +65,8 @@ body{
 }
 
 .navbar-title {
-  height: 40px; /* Set a fixed height */
-  width: auto; /* Maintain aspect ratio */
+  height:50px;
+  max-width: 200px;
   object-fit: contain; /* Ensure the image fits within the dimensions while maintaining aspect ratio */
   cursor: pointer;
   font-size: 18px;
@@ -88,7 +89,7 @@ body{
   padding: 12px 25px;
   font-size: 16px;
   color: black;
-  border-color: black;
+  border: 2px solid transparent;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s ease;

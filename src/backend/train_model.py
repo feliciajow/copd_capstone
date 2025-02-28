@@ -9,7 +9,7 @@ from lifelines.fitters.coxph_fitter import CoxPHFitter
 
 # Connect to database 
 conn = psycopg2.connect(
-    database="postgres",
+    database="cghdb",
     user="postgres",
     password="cghrespi",
     host="localhost",

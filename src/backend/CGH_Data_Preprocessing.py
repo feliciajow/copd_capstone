@@ -398,7 +398,7 @@ def upload_file():
 def train():    
     # Connect to database 
     conn = psycopg2.connect(
-        database="postgres",
+        database="cghdb",
         user="postgres",
         password="cghrespi",
         host="localhost",

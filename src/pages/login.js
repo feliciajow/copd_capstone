@@ -90,10 +90,10 @@ const Login = ({ handleLogin }) => {
           <Col span={1}></Col>
           <Col span={13}>
             <Row>
-              <h1>Welcome Back</h1>
+              <h1 className='title'>Welcome Back</h1>
             </Row>
             <Row>
-              <p style={{ fontSize: "17px" }}>Enter your credentials to continue.</p>
+              <p style={{ fontSize: "20px" }}>Enter your credentials to continue.</p>
             </Row>
             <br />
             <Form
@@ -107,7 +107,7 @@ const Login = ({ handleLogin }) => {
                 span: 18,
               }}
               style={{
-                maxWidth: 600,
+                maxWidth: "800px",
               }}
               initialValues={{
                 remember: true,
@@ -115,8 +115,9 @@ const Login = ({ handleLogin }) => {
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
               autoComplete="on"
+              size="large"
             >
-              <Form.Item style={{ textAlign: "left" }}
+              <Form.Item style={{ textAlign: "left"}}
                 name="email"
                 label="Email"
                 labelAlign="left"
@@ -159,12 +160,12 @@ const Login = ({ handleLogin }) => {
                 <Row>
                   <Col span={6}>
                     <Flex justify="space-between" align="left">
-                      <a href='#' onClick={openModal}>Forgot password</a>
+                      <a href='#' onClick={openModal}><h3>Forgot password</h3></a>
                     </Flex>
                   </Col>
                   <Col span={12}></Col>
                   <Col span={6}>
-                    <a href='/about'> Continue as guest</a>
+                    <a href='/about'> <h3>Continue as guest</h3></a>
                   </Col>
                 </Row>
                 <Row>
@@ -176,7 +177,7 @@ const Login = ({ handleLogin }) => {
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <p style={{ fontSize: "13px" }}>Don't have an account? <a href='#' onClick={() => navigate('/signup')}> Register</a></p>
+                    <p style={{ fontSize: "13px" }}><h3>Don't have an account?</h3> <a href='#' onClick={() => navigate('/signup')}> <h3>Register</h3></a></p>
                   </Col>
                 </Row>
               </Form.Item>

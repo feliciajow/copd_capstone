@@ -14,7 +14,7 @@ function Header({email, handleLogin}) {
   return (
     <div className="navbar">
       <div className="navbar-left">
-        <img src="/breathAI_logo1.jpg" className="navbar-title" onClick={() => navigate('/about')}/>
+        <img src="/breathai.png" className="navbar-title" onClick={() => navigate('/about')}/>
       </div>
       <div className="navbar-right">
         <button className="about-btn" onClick={() => navigate('/about')}>About</button>

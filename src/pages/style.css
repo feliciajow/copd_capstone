@@ -1,21 +1,53 @@
 /* login and sign up styling */
+.title {
+    font-size: 45px;
+}
 
-.register-btns, .login-btns{
+.register-btns,
+.login-btns {
     width: 100%;
     margin-top: 10px
 }
-.login-btns{
+
+.login-btns {
     background-color: #29b6f6;
 }
 
-.login-card,.signup-card{
-    margin-top:6%;
+.login-card,
+.signup-card {
+    margin-top: 6%;
 }
 
-.login-left, .signup-left {
+.login-left,
+.signup-left {
     background: url('../../public/lung_new.png') no-repeat;
-    background-size: 80%;
- }
+    background-size: 70%;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.loading h2 {
+    margin-top: 20px;
+}
+
+
+.form-item-label {
+    font-size: 30px;
+}
+
+.form-item-input {
+    font-size: 18px;
+}
 
 /* retrain styling */
 .ant-upload-drag {
@@ -28,12 +60,16 @@
     background-color: #ebf0f4;
 }
 
-.btns, .forgotpwd-btns {
+.btns,
+.forgotpwd-btns {
     transition: all 0.3s ease;
     margin-top: 30px;
 }
 
-.btns:hover, .forgotpwd-btns:hover, .register-btns:hover, .login-btns:hover {
+.btns:hover,
+.forgotpwd-btns:hover,
+.register-btns:hover,
+.login-btns:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -47,21 +83,22 @@
     padding: 50px;
 }
 
-.container{
+.container {
     padding: 4%;
 }
 
-.title, .header{
-    color:#3c3c3c;
-    text-align:left
+.title,
+.header {
+    color: #3c3c3c;
+    text-align: left
 }
 
-.model-card{
+.model-card {
     margin: auto;
     padding: 50px;
 }
 
-.pagination{
+.pagination {
     margin-top: 2%;
     padding-left: 65%;
 

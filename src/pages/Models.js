@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Table, Alert, Card, Badge, Row, Col, Button } from 'antd';
+import { Table, Alert, Card, Badge, Row, Col, Button, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const Models = ({ email }) => {
     const [fetchModel, setfetchModel] = useState([]);
@@ -125,7 +126,11 @@ const Models = ({ email }) => {
                 <div className="model-card">
                     <Row>
                         <Col span={5}>
-                            <h1 style={{ textAlign: 'left' }}>Models History</h1>
+                            <h1 style={{ textAlign: 'left' }}>Models History{' '}
+                                <Tooltip title="All models trained by users on BreatheAI." placement="top">
+                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                </Tooltip>
+                            </h1>
                         </Col>
                         <Col span={14}>
                         </Col>

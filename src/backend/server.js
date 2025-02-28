@@ -17,7 +17,7 @@ const client = new Client({
   user: "postgres",
   port: 5432,
   password: "cghrespi",
-  database: "postgres"
+  database: "cghdb"
 })
 client.connect();
 
