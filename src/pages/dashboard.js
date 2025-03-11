@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import './dashboard.css';
 import { Spin, Alert} from 'antd';
-
 import Plot from 'react-plotly.js';
-
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
@@ -18,7 +16,7 @@ const Dashboard = ({ email }) => {
     const [prediction, setPrediction] = useState(null);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
-    const [alert, setAlert] = useState(null);
+    const [alertMessage, setAlertMessage] = useState(null);
 
     useEffect(() => {
         console.log("Email in Dashboard:", email);
@@ -61,10 +59,11 @@ const Dashboard = ({ email }) => {
             }
         })
         .catch((error) => {
-            setAlert(
+            setAlertMessage(
                 <Alert
+                    message="Model Load Error"
                     description={error.message}
-                    type="info"
+                    type="error"
                     showIcon
                     className="mb-4"
                 />
@@ -91,10 +90,12 @@ const Dashboard = ({ email }) => {
 
     const handleModelChange = (e) => {
         if (email) {
-            setSelectedModel(e.target.value);
-            console.log("User selected model:", e.target.value);
+            const modelId = parseInt(e.target.value, 10); // Convert to integer
+            setSelectedModel(modelId);
+            console.log("User selected model:", modelId);
         }
     };
+    
 
     //To handle multiple selection of codes
     const handleSelectChange = (e) => {
@@ -126,7 +127,7 @@ const Dashboard = ({ email }) => {
         setLoading(true);
         try {
             const response = await axios.post("http://localhost:5001/predict", {
-                modelId: selectedModel,
+                modelid: Number(selectedModel),
                 gender: genderMapped,
                 age: parseInt(age),
                 readmissions: parseInt(timesAdmitted),
@@ -141,7 +142,15 @@ const Dashboard = ({ email }) => {
             // setTimesAdmitted('');
             // setSelectedCodes([]);  
         } catch (error) {
-            alert(error.response?.data?.error || "Error making prediction");
+            setAlertMessage(
+                <Alert
+                    message="Prediction Error"
+                    description={error.response?.data?.error || "Error making prediction"}
+                    type="error"
+                    showIcon
+                    className="mb-4"
+                />
+            );
         } finally {
             setLoading(false);
         }
@@ -237,7 +246,7 @@ const Dashboard = ({ email }) => {
                                 </option>
                             ))}
                         </select>
-                        {errors.modelid && <p className="error-message">{errors.modelid}</p>}
+                        {errors.model && <p className="error-message">{errors.model}</p>}
 
                             <h2>Gender</h2>
                             <select 

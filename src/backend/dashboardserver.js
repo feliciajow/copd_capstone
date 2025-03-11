@@ -5,6 +5,7 @@ const { Pool } = require("pg");
 const { PythonShell } = require("python-shell");
 const fs = require('fs').promises;
 const path = require('path');
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
@@ -60,15 +61,47 @@ async function getModel() {
             return null;
         }
     } catch (error) {
+        console.error("❌ Error fetching model:", error);
         return null;
+    }
+}
+
+// Function to Check and Retrieve Model from Cache or Database
+async function getModelPath(modelId) {
+    try {
+        const modelCachePath = path.join(tempDir, `model_${modelId}.pkl`);
+
+        // If model already exists in cache, return it
+        try {
+            await fs.access(modelCachePath);
+            console.log(`✅ Using cached model: ${modelCachePath}`);
+            return modelCachePath;
+        } catch (error) {
+            console.log(`🚀 Model ${modelId} not found in cache. Fetching from database...`);
+        }
+
+        // Fetch model from database using getModel function
+        const modelData = await getModel(modelId);
+        if (!modelData) {
+            throw new Error(`Model ID ${modelId} not found in database`);
+        }
+
+        // Save new model file
+        await fs.writeFile(modelCachePath, modelData.model_data);
+        console.log(`✅ Model ${modelId} saved to cache: ${modelCachePath}`);
+
+        return modelCachePath;
+    } catch (error) {
+        console.error("❌ Error retrieving model:", error);
+        throw error;
     }
 }
 
 // predict
 app.post("/predict", async (req, res) => {
-    const { gender, age, readmissions, diagnosticCodes } = req.body;
+    const {modelid, gender, age, readmissions, diagnosticCodes } = req.body;
 
-    if (gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
+    if (!modelid || gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
         return res.status(400).json({ error: "All input fields are required" });
     }
     try {
@@ -88,45 +121,26 @@ app.post("/predict", async (req, res) => {
 
         console.log("Diagnostic Code Mappings:", diagnosticInput);
 
-        // Get latest model
-        const modelData = await getModel();
-        if (!modelData) {
-            return res.status(404).json({ error: "No trained models found." });
-        }
+        // Load Model from Cache or Database
+        const modelPath = await getModelPath();
 
-        // Write model data to temp file
-        const tempModelPath = path.join(tempDir, `model_${Date.now()}.pkl`);
-        await fs.writeFile(tempModelPath, modelData.model_data);
-
+        // Format diagnostic codes for API request
         const formattedCodes = Object.values(diagnosticInput).join(",");
 
-        // Call Python script for prediction
-        let options = {
-            mode: "json",
-            pythonOptions: ["-u"], 
-            pythonPath: "python",   
-            args: [tempModelPath, gender, age, readmissions, formattedCodes],
-            stderrParser: true
-        };
+        // Call Flask API for prediction
+        const response = await axios.post("http://localhost:5002/predict", {
+            modelPath, // Pass cached model path
+            gender,
+            age,
+            readmissions,
+            diagnosticCodes: formattedCodes,
+        });
 
-        PythonShell.run("predict.py", options)
-            .then(async (results) => {
-                // Clean up temp file
-                await fs.unlink(tempModelPath).catch(console.error);
-
-                if (results && results.length > 0) {
-                    res.json(results[0]);  
-                } else {
-                    res.status(500).json({ error: "No prediction results" });
-                }
-            })
-            .catch(async (err) => {
-                await fs.unlink(tempModelPath).catch(console.error);
-                res.status(500).json({ error: "Prediction failed: " + err.message });
-            });
+        res.json(response.data);
 
     } catch (error) {
-        res.status(500).json({ error: "An error occurred while making predictions." });
+        console.error("❌ Prediction failed:", error);
+        res.status(500).json({ error: "Prediction failed: " + error.message });
     }
 });
 

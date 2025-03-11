@@ -15,7 +15,8 @@ import psycopg2
 app = Flask(__name__)
 CORS(app, resources={
     r"/fileUpload": {"origins": "http://localhost:3000"},
-    r"/train": {"origins": "http://localhost:3000"} 
+    r"/train": {"origins": "http://localhost:3000"},
+    r"/predict": {"origins": "http://localhost:3000"}
 })
 
 
@@ -23,7 +24,16 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 OUTPUT_FOLDER = "output"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+TEMP_DIR = "temp"
 
+
+DB_CONFIG = {
+    "database": "postgres",
+    "user": "postgres",
+    "password": "cghrespi",
+    "host": "localhost",
+    "port": "5432",
+}
 
 @app.route("/fileUpload", methods=["POST"])
 def upload_file():
@@ -397,13 +407,7 @@ def upload_file():
 @app.route("/train", methods=["POST"])
 def train():    
     # Connect to database 
-    conn = psycopg2.connect(
-        database="postgres",
-        user="postgres",
-        password="cghrespi",
-        host="localhost",
-        port="5432"
-    )
+    conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
 
     # Fetch userid and email from users table
@@ -472,6 +476,94 @@ def train():
 
     # print(f"Model saved in database for User - ID: {userid}, Email: {email} (Model ID: {modelid})")
     return f"Model Training Successful! Model ID: {modelid}", 200
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        # Get request data
+        data = request.get_json()
+
+        print("\n🔍 Received request data:", data)
+
+        model_id = data.get("modelPath")  # Model path from cache
+        gender = data.get("gender")
+        age = data.get("age")
+        readmissions = data.get("readmissions")
+        diagnostic_codes = data.get("diagnosticCodes", [])
+
+        print(f"🛠️ Gender: {gender}")
+        print(f"🛠️ Age: {age}")
+        print(f"🛠️ Readmissions: {readmissions}")
+        print(f"🛠️ Raw Diagnostic Codes: {diagnostic_codes}")
+
+        # Check if required fields are missing
+        if model_id is None or gender is None or age is None or readmissions is None or not diagnostic_codes:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Convert to correct types
+        gender = int(gender)
+        age = int(age)
+        readmissions = int(readmissions)
+        # ✅ Handle diagnostic codes (convert from string if necessary)
+        if isinstance(diagnostic_codes, str):  # If it's a string, split it
+            diagnostic_codes = diagnostic_codes.split(",")
+
+        # ✅ Convert each code to an integer safely
+        try:
+            diagnostic_codes = [int(code.strip()) for code in diagnostic_codes if code.strip().isdigit()]
+        except ValueError:
+            return jsonify({"error": "Invalid diagnostic codes format"}), 400
+        
+        print(f"✅ Processed Diagnostic Codes: {diagnostic_codes}")
+
+        model_path = os.path.join(TEMP_DIR, f"model_{model_id}.pkl")
+        print(f"📁 Searching for Model in: {model_path}")
+
+        # Cached model file path
+        if not os.path.exists(model_path):
+            return jsonify({"error": "Model file not found"}), 404
+        
+        try:
+            with open(model_path, "rb") as f:
+                model = pickle.load(f)
+            print("✅ Model successfully loaded!")
+        except Exception as e:
+            return jsonify({"error": f"Model loading failed: {str(e)}"}), 500
+
+        print("Model successfully loaded!")
+
+        # Prepare input data for prediction
+        features = [gender, age, readmissions] + diagnostic_codes
+        input_data = np.array([features])
+
+        # Predict survival function
+        survival_funcs = model.predict_survival_function(input_data)
+
+        # Extract survival probabilities
+        time_points = survival_funcs[0].x.tolist()
+        survival_probs = survival_funcs[0].y.tolist()
+
+        # Compute survival and readmission probabilities
+        survival_6_month = float(survival_funcs[0](180))
+        survival_12_month = float(survival_funcs[0](360))  
+        readmission_1_year = 1 - float(survival_funcs[0](365))
+        readmission_5_year = 1 - float(survival_funcs[0](1825))
+
+        response_data = {
+            "survival_curve": {
+                "time": time_points,
+                "probability": survival_probs
+            },
+            "survival_6_month": survival_6_month,
+            "survival_12_month": survival_12_month,
+            "readmission_1_year": readmission_1_year,
+            "readmission_5_year": readmission_5_year
+        }
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)
