@@ -59,7 +59,7 @@ function App() {
         <Header email={email} handleLogin={handleLogin}/> {/* Include the Header component */}
         <Routes>
           <Route path="/" element={<Login handleLogin={handleLogin}/>} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard email={email}/>} />
           <Route path="/about" element={<About />} />
           <Route path="/retrain" element={<Retrain email={email}/>} />
           <Route path="/models" element={<Models email={email}/>} />

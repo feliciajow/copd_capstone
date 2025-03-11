@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import './dashboard.css';
-import { Spin } from 'antd';
+import { Spin, Alert} from 'antd';
 
 import Plot from 'react-plotly.js';
 
 
-const Dashboard = () => {
+const Dashboard = ({ email }) => {
+    const [models, setModels] = useState([]);
+    const [selectedModel, setSelectedModel] = useState('');
     const [gender, setGender] = useState('');
     const [age, setAge] = useState('');
     const [timesAdmitted, setTimesAdmitted] = useState('');
@@ -16,7 +18,62 @@ const Dashboard = () => {
     const [prediction, setPrediction] = useState(null);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState(null);
 
+    useEffect(() => {
+        console.log("Email in Dashboard:", email);
+        if (email) {
+            fetchModels(); 
+        }
+    }, [email]);
+
+    // Fetch trained models from backend
+    const fetchModels = () => {
+        setLoading(true);
+        fetch('http://localhost:5000/model', {
+            method: 'GET',
+            headers: { "Content-Type": "application/json", "Email": email || "" },
+        })
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((data) => {
+                    throw new Error(data.error || 'Failed to fetch models');
+                });
+            }
+            return response.json();
+        })
+        .then((modelList) => {
+            console.log("Fetched Models:", modelList);
+
+            if (Array.isArray(modelList) && modelList.length > 0) {
+                setModels(modelList);
+
+                // Auto-select the latest model for non-registered users
+                if (!email) {
+                    const latestModel = modelList.reduce((a, b) =>
+                        new Date(a.timestamp) > new Date(b.timestamp) ? a : b
+                    );
+                    setSelectedModel(latestModel.modelid);
+                    console.log("Auto-selected latest model for guest:", latestModel.modelid);
+                }
+            } else {
+                console.warn("No models found in the database");
+            }
+        })
+        .catch((error) => {
+            setAlert(
+                <Alert
+                    description={error.message}
+                    type="info"
+                    showIcon
+                    className="mb-4"
+                />
+            );
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+    };
     
     //Fetch diagnostic codes from backend
     useEffect(() => {
@@ -31,6 +88,13 @@ const Dashboard = () => {
       }
       fetchDiagnosticCodes();
     }, []);
+
+    const handleModelChange = (e) => {
+        if (email) {
+            setSelectedModel(e.target.value);
+            console.log("User selected model:", e.target.value);
+        }
+    };
 
     //To handle multiple selection of codes
     const handleSelectChange = (e) => {
@@ -50,6 +114,7 @@ const Dashboard = () => {
         let validationErrors = {};
         const genderMapped = gender === "female" ? 1 : gender === "male" ? 0 : null;
 
+        if (!selectedModel) validationErrors.model = "*Model selection is required";
         if (genderMapped === null) validationErrors.gender = "*Gender is required";
         if (!age || parseInt(age) <= 0) validationErrors.age = "*Age is required";
         if (!timesAdmitted || parseInt(timesAdmitted) <= 0) validationErrors.timesAdmitted = "*Number of admissions is required";
@@ -61,6 +126,7 @@ const Dashboard = () => {
         setLoading(true);
         try {
             const response = await axios.post("http://localhost:5001/predict", {
+                modelId: selectedModel,
                 gender: genderMapped,
                 age: parseInt(age),
                 readmissions: parseInt(timesAdmitted),
@@ -157,6 +223,22 @@ const Dashboard = () => {
                     {/* Form Section */}
                     <div className="main-content">
                         <div className="form-section">
+                        <h2>Select Model</h2>
+                        <select
+                            className="input-field"
+                            value={selectedModel}
+                            onChange={handleModelChange}
+                            disabled={!email}
+                        >
+                            <option value="">Select a model</option>
+                            {models.map((model) => (
+                                <option key={model.modelid} value={model.modelid}>
+                                    {model.modelid}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.modelid && <p className="error-message">{errors.modelid}</p>}
+
                             <h2>Gender</h2>
                             <select 
                                 className="input-field"
