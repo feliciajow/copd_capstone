@@ -2,12 +2,11 @@
   text-align: center;
 }
 body{
-  background: url("../public/backgroundcolor.jpg") no-repeat;
+  background: url("../public/backgroundcolor.png") no-repeat;
   /* background-color: gold; */
   /* background-image: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%); */
   background-size: cover;
-  overflow: scroll;
-
+  overflow-x: hidden;
 }
 /* .App-logo {
   height: 40vmin;

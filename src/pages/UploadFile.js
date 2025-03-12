@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CloudUploadOutlined, DownloadOutlined } from '@ant-design/icons';
-import { Upload, Button, Alert, message } from 'antd';
+import { CloudUploadOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Upload, Button, Alert, message, Tooltip } from 'antd';
 import ExcelTemplate from './downloadExcel';
 
 const { Dragger } = Upload;
@@ -88,7 +88,12 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
   return (
     <div>
       {uploadAlert}
-      <h1 className="title">Upload File</h1>
+      <h1 className="title">
+        Upload File{' '}
+        <Tooltip title="Upload a valid single CSV or XLSX file to retrain a new model." placement="topLeft">
+          <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+        </Tooltip>
+      </h1>
       <div className="card-container">
         <ExcelTemplate />
         <br />

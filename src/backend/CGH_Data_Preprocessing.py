@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import icd10
 from flask import send_file
@@ -28,7 +28,7 @@ TEMP_DIR = "temp"
 
 
 DB_CONFIG = {
-    "database": "postgres",
+    "database": "cghdb",
     "user": "postgres",
     "password": "cghrespi",
     "host": "localhost",
@@ -442,15 +442,6 @@ def train():
     # Split into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, data_y, test_size=0.2, random_state=42)
 
-    # Store patient IDs separately for reference
-    # if "Patient ID" in X_train.columns:
-    #     patient_ids_train = pd.DataFrame(X_train["Patient ID"])
-    #     patient_ids_test = pd.DataFrame(X_test["Patient ID"])
-
-    # Drop Patient_ID before training
-    # X_train = X_train.drop(columns=["Patient ID"])
-    # X_test = X_test.drop(columns=["Patient ID"])
-
     #Train Random Survival Forest model
     rsf = RandomSurvivalForest(n_estimators=100, min_samples_split=10, min_samples_leaf=15, max_features="sqrt", n_jobs=-1, random_state=42)
     rsf.fit(X_train, y_train)
@@ -462,20 +453,20 @@ def train():
 
     #Serialize model using pickle to store in DB
     model_binary = pickle.dumps(rsf)
-
+    expire_date = datetime.now() + timedelta(days=30)
     #Insert model into PostgreSQL
     cur.execute("""
-        INSERT INTO models (timestamp, model_data, c_index)
-        VALUES (%s, %s, %s)
+        INSERT INTO models (timestamp, model_data, c_index, expire_date)
+        VALUES (%s, %s, %s, %s)
         RETURNING modelid;
-    """, (datetime.now(), model_binary, c_index))
+    """, (datetime.now(), model_binary, c_index, expire_date))
 
     #Retrieve the new modelid
     modelid = cur.fetchone()[0]
     conn.commit()
 
     # print(f"Model saved in database for User - ID: {userid}, Email: {email} (Model ID: {modelid})")
-    return f"Model Training Successful! Model ID: {modelid}", 200
+    return f"Model Training Successful! Model ID: {modelid} {expire_date}", 200
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -483,18 +474,19 @@ def predict():
         # Get request data
         data = request.get_json()
 
-        print("\n🔍 Received request data:", data)
+        print("\n Received request data:", data)
 
-        model_id = data.get("modelPath")  # Model path from cache
+        model_id = data.get("modelid")  # Model path from cache
         gender = data.get("gender")
         age = data.get("age")
         readmissions = data.get("readmissions")
         diagnostic_codes = data.get("diagnosticCodes", [])
 
-        print(f"🛠️ Gender: {gender}")
-        print(f"🛠️ Age: {age}")
-        print(f"🛠️ Readmissions: {readmissions}")
-        print(f"🛠️ Raw Diagnostic Codes: {diagnostic_codes}")
+        print(f"Model ID: {model_id}")
+        print(f"Gender: {gender}")
+        print(f"Age: {age}")
+        print(f"Readmissions: {readmissions}")
+        print(f"Raw Diagnostic Codes: {diagnostic_codes}")
 
         # Check if required fields are missing
         if model_id is None or gender is None or age is None or readmissions is None or not diagnostic_codes:
@@ -504,20 +496,20 @@ def predict():
         gender = int(gender)
         age = int(age)
         readmissions = int(readmissions)
-        # ✅ Handle diagnostic codes (convert from string if necessary)
+        # Handle diagnostic codes (convert from string if necessary)
         if isinstance(diagnostic_codes, str):  # If it's a string, split it
             diagnostic_codes = diagnostic_codes.split(",")
 
-        # ✅ Convert each code to an integer safely
+        # Convert each code to an integer safely
         try:
-            diagnostic_codes = [int(code.strip()) for code in diagnostic_codes if code.strip().isdigit()]
+            diagnostic_codes = [code.strip() for code in diagnostic_codes if code.strip()]
         except ValueError:
             return jsonify({"error": "Invalid diagnostic codes format"}), 400
         
-        print(f"✅ Processed Diagnostic Codes: {diagnostic_codes}")
+        print(f"Processed Diagnostic Codes: {diagnostic_codes}")
 
         model_path = os.path.join(TEMP_DIR, f"model_{model_id}.pkl")
-        print(f"📁 Searching for Model in: {model_path}")
+        print(f"Searching for Model in: {model_path}")
 
         # Cached model file path
         if not os.path.exists(model_path):
@@ -526,18 +518,36 @@ def predict():
         try:
             with open(model_path, "rb") as f:
                 model = pickle.load(f)
-            print("✅ Model successfully loaded!")
+            print("Model successfully loaded!")
         except Exception as e:
             return jsonify({"error": f"Model loading failed: {str(e)}"}), 500
 
         print("Model successfully loaded!")
 
         # Prepare input data for prediction
-        features = [gender, age, readmissions] + diagnostic_codes
-        input_data = np.array([features])
+        #Names of features seen during fit. Defined only when X has feature names that are all strings
+        features = model.feature_names_in_
+        print('Features',features)
+        #features = [gender, age, readmissions] + diagnostic_codes
+        input_df = pd.DataFrame(0, index=[0], columns=features)
+        if 'Readmission' in features:
+            print('Readmission in features')
+            input_df['Readmission'] = readmissions
+        if 'Gender' in features:
+            print('Gender in features')
+            input_df['Gender'] = gender
+        if 'Age' in features:
+            print('Age in features')
+            input_df['Age'] = age
+        
+        for code in diagnostic_codes:
+            code_str = str(code)
+            if code_str in features:
+                input_df[code_str] = 1
 
+        print('Input df',input_df)
         # Predict survival function
-        survival_funcs = model.predict_survival_function(input_data)
+        survival_funcs = model.predict_survival_function(input_df)
 
         # Extract survival probabilities
         time_points = survival_funcs[0].x.tolist()
@@ -560,10 +570,10 @@ def predict():
             "readmission_5_year": readmission_5_year
         }
 
-        return jsonify(response_data)
+        return jsonify(response_data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=True, host="0.0.0.0", port=5002)

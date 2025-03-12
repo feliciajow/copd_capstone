@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Table, Alert, Card, Badge, Row, Col, Button } from 'antd';
+import { Table, Alert, Card, Badge, Row, Col, Button, Tooltip} from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const Models = ({ email }) => {
     const [fetchModel, setfetchModel] = useState([]);
@@ -34,6 +35,7 @@ const Models = ({ email }) => {
                 return response.json();
             })
             .then((model) => {
+                console.log(model);
                 setfetchModel(model);
             })
             .catch((error) => {
@@ -60,7 +62,7 @@ const Models = ({ email }) => {
             fixed: 'left',
         },
         {
-            title: 'C_Index',
+            title: 'C Index',
             dataIndex: 'c_index',
             key: 'c_index',
             width: '15%',
@@ -70,7 +72,7 @@ const Models = ({ email }) => {
             ...getColumnSearchProps('c_index'),
         },
         {
-            title: 'Created at',
+            title: 'Created At',
             dataIndex: 'timestamp',
             key: 'created_time',
             width: '25%',
@@ -81,35 +83,13 @@ const Models = ({ email }) => {
         },
         
         {
-            title: 'Status',
+            title: 'Expiration Date',
+            dataIndex: 'expire_date',
+            key: 'expire_date',
             width: '15%',
-            filters: [
-                {
-                    text: 'Model In Use',
-                    value: 'Model In Use',
-                },
-                {
-                    text: 'Model Not In Use',
-                    value: 'Model Not In Use',
-                },
-            ],
-            onFilter: (value, record) => {
-                const latestTimestamp = Math.max(...fetchModel.map(model => new Date(model.timestamp).getTime()));
-                const currentTimestamp = new Date(record.timestamp).getTime();
-                const status = currentTimestamp === latestTimestamp ? 'Model In Use' : 'Model Not In Use';
-                return status === value;
-            },
-            render: (_, record, index) => {
-                // Find the latest timestamp
-                const latestTimestamp = Math.max(...fetchModel.map(model => new Date(model.timestamp).getTime()));
-                const currentTimestamp = new Date(record.timestamp).getTime();
-
-                return (
-                    <Badge
-                        status={currentTimestamp === latestTimestamp ? "success" : "default"}
-                        text={currentTimestamp === latestTimestamp ? "Model In Use" : "Model Not In Use"}
-                    />
-                );
+            render: (text) => new Date(text).toLocaleString(),
+            sorter: {
+                compare: (a, b) => new Date(a.expire_date).getTime() - new Date(b.expire_date).getTime()
             },
         },
     ];
@@ -125,7 +105,11 @@ const Models = ({ email }) => {
                 <div className="model-card">
                     <Row>
                         <Col span={5}>
-                            <h1 style={{ textAlign: 'left' }}>Models History</h1>
+                            <h1 style={{ textAlign: 'left' }}>Models History{' '}
+                                <Tooltip title="All models trained by users on BreatheAI." placement="top">
+                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                </Tooltip>
+                            </h1>
                         </Col>
                         <Col span={14}>
                         </Col>

@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 const pool = new Pool({
     user: "postgres",
     host: "localhost",
-    database: "postgres",
+    database: "cghdb",
     password: "cghrespi",
     port: 5432,
 });
@@ -46,10 +46,11 @@ app.get("/diagnostic-codes", async (req, res) => {
 });
 
 // Retrieve/Get model
-async function getModel() {
+async function getModel(modelId) {
     try {
         const result = await pool.query(
-            "SELECT modelid, model_data FROM models ORDER BY timestamp DESC LIMIT 1"
+            "SELECT modelid, model_data FROM models WHERE modelid = $1",
+            [modelId]
         );
 
         if (result.rows.length > 0) {
@@ -61,7 +62,7 @@ async function getModel() {
             return null;
         }
     } catch (error) {
-        console.error("❌ Error fetching model:", error);
+        console.error("Error fetching model:", error);
         return null;
     }
 }
@@ -74,10 +75,10 @@ async function getModelPath(modelId) {
         // If model already exists in cache, return it
         try {
             await fs.access(modelCachePath);
-            console.log(`✅ Using cached model: ${modelCachePath}`);
+            console.log(`Using cached model: ${modelCachePath}`);
             return modelCachePath;
         } catch (error) {
-            console.log(`🚀 Model ${modelId} not found in cache. Fetching from database...`);
+            console.log(`Model ${modelId} not found in cache. Fetching from database...`);
         }
 
         // Fetch model from database using getModel function
@@ -88,11 +89,11 @@ async function getModelPath(modelId) {
 
         // Save new model file
         await fs.writeFile(modelCachePath, modelData.model_data);
-        console.log(`✅ Model ${modelId} saved to cache: ${modelCachePath}`);
+        console.log(`Model ${modelId} saved to cache: ${modelCachePath}`);
 
         return modelCachePath;
     } catch (error) {
-        console.error("❌ Error retrieving model:", error);
+        console.error("Error retrieving model:", error);
         throw error;
     }
 }
@@ -122,24 +123,24 @@ app.post("/predict", async (req, res) => {
         console.log("Diagnostic Code Mappings:", diagnosticInput);
 
         // Load Model from Cache or Database
-        const modelPath = await getModelPath();
+        const modelPath = await getModelPath(modelid);
 
         // Format diagnostic codes for API request
         const formattedCodes = Object.values(diagnosticInput).join(",");
 
         // Call Flask API for prediction
-        const response = await axios.post("http://localhost:5002/predict", {
-            modelPath, // Pass cached model path
+        const response = await axios.post("http://127.0.0.1:5002/predict", {
+            modelid,
             gender,
             age,
             readmissions,
-            diagnosticCodes: formattedCodes,
+            diagnosticCodes: Object.keys(diagnosticInput).filter(code => diagnosticInput[code] === 1)
         });
 
         res.json(response.data);
 
     } catch (error) {
-        console.error("❌ Prediction failed:", error);
+        console.error("Prediction failed:", error);
         res.status(500).json({ error: "Prediction failed: " + error.message });
     }
 });

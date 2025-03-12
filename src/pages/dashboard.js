@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip } from 'antd';
 import axios from "axios";
 import './dashboard.css';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert} from 'antd';
 import Plot from 'react-plotly.js';
 
@@ -136,11 +138,6 @@ const Dashboard = ({ email }) => {
             console.log("API Response:", response.data); 
 
             setPrediction(response.data);
-            // Reset form input after prediction
-            // setGender('');
-            // setAge('');
-            // setTimesAdmitted('');
-            // setSelectedCodes([]);  
         } catch (error) {
             setAlertMessage(
                 <Alert
@@ -201,7 +198,12 @@ const Dashboard = ({ email }) => {
                 <>
                     <div className="results-container">
                         <div className="results-group estimated-survival">
-                            <h3>Estimated Survival</h3>
+                            <h3>
+                                Estimated Survival{' '}
+                                <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
+                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                </Tooltip>
+                            </h3>
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>6 month</h3>
@@ -215,7 +217,12 @@ const Dashboard = ({ email }) => {
                         </div>
 
                         <div className="results-group estimated-readmission">
-                            <h3>Estimated Readmission</h3>
+                            <h3>
+                                Estimated Readmission{' '}
+                                <Tooltip title="Estimated Readmission Probability over 30 and 60 days" placement="top">
+                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                </Tooltip>
+                            </h3>
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>30 days</h3>
