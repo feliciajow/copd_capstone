@@ -1,14 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { CloudUploadOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { Upload, Button, Alert, message, Tooltip } from 'antd';
+import { Upload, Button, Alert, message, Tooltip, Select} from 'antd';
 import ExcelTemplate from './downloadExcel';
+import * as XLSX from "xlsx";
+import icd10Excel from "./icd10_code.xlsx"; 
+import './style.css';
 
 const { Dragger } = Upload;
+const { Option } = Select;
 
 const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadAlert, setUploadAlert] = useState(null);
+  const [diagnosticInterest, setDiagnosticInterest] = useState("J44"); 
+  const [diagnosticOptions, setDiagnosticOptions] = useState([
+    { code: "J44", description: "COPD" },
+    { code: "I10", description: "Hypertension" },
+    { code: "E11", description: "Diabetes Mellitus" }
+  ]); 
+
+  // Function to load and parse the Excel file
+  const loadICDCodesFromFile = async () => {
+    try {
+      const response = await fetch(icd10Excel);
+      const blob = await response.blob();
+
+      const reader = new FileReader();
+      reader.readAsBinaryString(blob);
+
+      reader.onload = (e) => {
+        const binaryStr = e.target.result;
+        const workbook = XLSX.read(binaryStr, { type: "binary" });
+
+        if (workbook.SheetNames.length === 0) {
+          throw new Error("No sheets found in the Excel file.");
+        }
+
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        if (!worksheet) {
+          throw new Error("Sheet is empty or invalid.");
+        }
+
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        if (jsonData.length === 0) {
+          throw new Error("Excel file has no data.");
+        }
+
+        // Extract ICD-10 codes
+        const extractedCodes = jsonData.map(row => {
+          if (row["ICD-10 Combined"]) {
+            const [code, ...descParts] = row["ICD-10 Combined"].split(": ");
+            return { code, description: descParts.join(": ") || "No description available" };
+          }
+          return null;
+        }).filter(Boolean);
+
+        setDiagnosticOptions((prevOptions) => {
+          const newOptions = [...prevOptions, ...extractedCodes].filter((item, index, self) =>
+            index === self.findIndex((t) => t.code === item.code)
+          );
+          return newOptions;
+        });
+
+        message.success("ICD-10 codes loaded from Excel file!");
+      };
+    } catch (error) {
+      console.error("Error loading Excel file:", error);
+      message.error("Error loading ICD-10 codes: " + error.message);
+    }
+  };
+
+  // Load the Excel file when the component mounts
+  useEffect(() => {
+    loadICDCodesFromFile();
+  }, []);
 
   const handleUpload = () => {
     if (fileList.length === 0) {
@@ -19,7 +88,9 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
     const formData = new FormData();
     formData.append('file', fileList[0]); // Ensure we upload the raw file
     console.log("Uploading file:", fileList[0]);
+    formData.append("diagnostic_interest", diagnosticInterest); 
 
+    console.log("Selected Diagnostic Interest:", diagnosticInterest);
 
     setUploading(true);
 
@@ -97,6 +168,31 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
       <div className="card-container">
         <ExcelTemplate />
         <br />
+
+        <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block" }}>
+          Select Diagnostic Interest:
+        </label>
+        <Select
+          showSearch
+          value={diagnosticInterest}
+          onChange={(value) => {
+            const shortCode = value.substring(0, 3); // Extract first 3 letters
+            setDiagnosticInterest(shortCode);
+          }}
+          style={{ width: "100%", marginBottom: "16px" }}
+          placeholder="Search or select a diagnostic code"
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            String(option.children).toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {diagnosticOptions.map(({ code, description }) => (
+            <Option key={code} value={code}>
+              {`${code} (${description})`}
+            </Option>
+          ))}
+        </Select>
+
         <Dragger {...uploadProps}>
           <p className="ant-upload-drag-icon">
             <CloudUploadOutlined />

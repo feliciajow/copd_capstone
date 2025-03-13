@@ -82,7 +82,7 @@
       flex: 1;
       display: flex;
       flex-direction: column; /* Restrict form section width */
-      padding: 50px;
+      padding: 20px;
     }
   
     h2 {
@@ -147,25 +147,28 @@
     /* Chart section */
     .chart-section {
       display: flex;
+      flex-wrap: wrap;
       flex-direction: column; /* Arrange items side by side */
       align-items: left; /* Align items in the center */
-      /* width: 100%; */
-      max-width: 800px; /* Adjust max width */
+      max-width: 1200px; /* Adjust max width */
       margin-top: 40px;
+      margin-left: 800px;
+      gap: 30px;
       
   }
     
     /* Adjust chart sizes */
     .chart {
-      width: 100%; /* Match width of the form */
+      width: 75%; /* Match width of the form */
+      min-width: 800px;
       max-width: 1200px; /* Prevent excessive stretching */
-      height: 400px; /* Adjust height */
+      height: auto; /* Adjust height */
       border: 1px solid transparent;
       border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 70px;
+      padding: 50px;
       margin-right: 1000px;
   }
   
@@ -181,7 +184,8 @@
     .form-section .input-container,
     .form-section .input-field,
     .form-section select {
-      width: 400px; 
+      width: 100%; 
+      max-width: 400px; 
       /* max-width: 400px;  */
       height: 60px; 
       box-sizing: border-box; /* Ensure padding and border are included in the width/height */
@@ -206,7 +210,7 @@
   }
   
   /* Responsive Design */
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     .dashboard-container {
       flex-direction: column; /* Stack all sections vertically on smaller screens */
     }
@@ -227,4 +231,5 @@
     .chart-section {
       max-width: 100%; /* Allow sections to take full width */
     }
+
     }

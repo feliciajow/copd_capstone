@@ -6,6 +6,7 @@ import './dashboard.css';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert} from 'antd';
 import Plot from 'react-plotly.js';
+import icd10Data from "./icd10_codes.json";
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
@@ -78,17 +79,17 @@ const Dashboard = ({ email }) => {
     
     //Fetch diagnostic codes from backend
     useEffect(() => {
-      async function fetchDiagnosticCodes() {
-          try {
-              const response = await axios.get("http://localhost:5001/diagnostic-codes");
-              console.log("Fetched Diagnostic Codes:", response.data.codes);
-              setDiagnosticCodes(response.data.codes);
-          } catch (error) {
-              console.error("Failed to load diagnostic codes:", error);
-          }
-      }
-      fetchDiagnosticCodes();
-    }, []);
+        async function fetchDiagnosticCodes() {
+            try {
+                const response = await axios.get("http://localhost:5001/diagnostic-codes");
+                console.log("Fetched Diagnostic Codes:", response.data.codes);
+                setDiagnosticCodes(response.data.codes);
+            } catch (error) {
+                console.error("Failed to load diagnostic codes:", error);
+            }
+        }
+        fetchDiagnosticCodes();
+      }, []);
 
     const handleModelChange = (e) => {
         if (email) {
@@ -158,139 +159,145 @@ const Dashboard = ({ email }) => {
     //     Survival: prediction.survival_curve.probability[index]
     // })) || [];
 
-    const generateSurvivalCurve = () => {
-        if (!prediction || !prediction.survival_curve) {
-            console.log("No survival curve data available");
-            return [];
-        }
-    
-        const survivalData = prediction.survival_curve.time.map((day, index) => ({
-            days: day,
-            Survival: 1- prediction.survival_curve.probability[index], 
-        }));
-    
-        console.log("Survival Data for Graph:", survivalData); 
-    
-        return survivalData;
-    };
-
-
-    const generateReadmissionCurve = () => {
-        if (!prediction) return [];
-
-        const days = Array.from({ length: 2695 }, (_, i) => i); // Days from 0 to 1825
-        return days.map(day => ({
-            days: day,
-            Readmission: (prediction.readmission_1_year * Math.log(1 + day / 365)) * 100 // Logarithmic growth
-        }));
-    };
-
-    const survivalData = generateSurvivalCurve();
-    const readmissionData = generateReadmissionCurve();
-
-    return (
-        <div className="dashboard-container">
-            {loading ? (
-                <div className="loading-overlay">
-                    <Spin size="large" />
-                </div>
-            ) : (
-                <>
-                    <div className="results-container">
-                        <div className="results-group estimated-survival">
-                            <h3>
-                                Estimated Survival{' '}
-                                <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
-                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
-                                </Tooltip>
-                            </h3>
-                            <div className="metric-cards">
-                                <div className="probability">
-                                    <h3>6 month</h3>
-                                    <p>{prediction?.survival_6_month ? `${(prediction.survival_6_month * 100).toFixed(1)}%` : "N/A"}</p>
-                                </div>
-                                <div className="probability">
-                                    <h3>12 month</h3>
-                                    <p>{prediction?.survival_12_month ? `${(prediction.survival_12_month * 100).toFixed(1)}%` : "N/A"}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="results-group estimated-readmission">
-                            <h3>
-                                Estimated Readmission{' '}
-                                <Tooltip title="Estimated Readmission Probability over 30 and 60 days" placement="top">
-                                    <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
-                                </Tooltip>
-                            </h3>
-                            <div className="metric-cards">
-                                <div className="probability">
-                                    <h3>30 days</h3>
-                                    <p>{prediction?.readmission_1_year ? `${(prediction.readmission_1_year * 100).toFixed(1)}%` : "N/A"}</p>
-                                </div>
-                                <div className="probability">
-                                    <h3>60 days</h3>
-                                    <p>{prediction?.readmission_5_year ? `${(prediction.readmission_5_year * 100).toFixed(1)}%` : "N/A"}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Form Section */}
-                    <div className="main-content">
-                        <div className="form-section">
-                        <h2>Select Model</h2>
-                        <select
-                            className="input-field"
-                            value={selectedModel}
-                            onChange={handleModelChange}
-                            disabled={!email}
-                        >
-                            <option value="">Select a model</option>
-                            {models.map((model) => (
-                                <option key={model.modelid} value={model.modelid}>
-                                    {model.modelid}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.model && <p className="error-message">{errors.model}</p>}
-
-                            <h2>Gender</h2>
-                            <select 
-                                className="input-field"
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}>
-                                <option value="">Select a gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                            {errors.gender && <p className="error-message">{errors.gender}</p>}
-
-                            <h2>Age</h2>
-                            <div className="input-container">
-                                <input
-                                    className="input-field"
-                                    type="number"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value)}
-                                    placeholder="Enter age"
-                                />
-                            </div>
-                            {errors.age && <p className="error-message">{errors.age}</p>}
-                            
-                            <h2>Number of Times Admitted</h2>
-                            <div className="input-container">
-                                <input
-                                    className="input-field"
-                                    type="number"
-                                    value={timesAdmitted}
-                                    onChange={(e) => setTimesAdmitted(e.target.value)}
-                                    placeholder="Enter times admitted"
-                                />
-                            </div>
-                            {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
-
-                            <h2>Diagnostic Codes</h2>
+     const generateSurvivalCurve = () => {
+         if (!prediction || !prediction.death_curve) {
+             console.log("No survival curve data available");
+             return [];
+         }
+     
+         const survivalData = prediction.death_curve.time.map((day, index) => ({
+             days: day,
+             Survival: 1 - prediction.death_curve.probability[index], 
+         }));
+     
+         console.log("Survival Data for Graph:", survivalData); 
+     
+         return survivalData;
+     };
+ 
+ 
+     const generateReadmissionCurve = () => {
+         if (!prediction || !prediction.readmission_curve) {
+             console.log("No readmission curve data available");
+             return [];
+         }
+     
+         const readmissionData = prediction.readmission_curve.time.map((day, index) => ({
+             days: day,
+             Readmission: 1 - prediction.readmission_curve.probability[index], 
+         }));
+     
+         console.log("Readmission Data for Graph:", readmissionData); 
+     
+         return readmissionData;
+     };
+ 
+     const survivalData = generateSurvivalCurve();
+     const readmissionData = generateReadmissionCurve();
+ 
+     return (
+         <div className="dashboard-container">
+             {loading ? (
+                 <div className="loading-overlay">
+                     <Spin size="large" />
+                 </div>
+             ) : (
+                 <>
+                     <div className="results-container">
+                         <div className="results-group estimated-survival">
+                             <h3>
+                                 Estimated Survival{' '}
+                                 <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
+                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                 </Tooltip>
+                             </h3>
+                             <div className="metric-cards">
+                                 <div className="probability">
+                                     <h3>6 month</h3>
+                                     <p>{prediction?.death_6_month ? `${(prediction.death_6_month * 100).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                                 <div className="probability">
+                                     <h3>12 month</h3>
+                                     <p>{prediction?.death_12_month ? `${(prediction.death_12_month * 100).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                             </div>
+                         </div>
+ 
+                         <div className="results-group estimated-readmission">
+                             <h3>
+                                 Estimated Readmission{' '}
+                                 <Tooltip title="Estimated Readmission Probability over 30 and 60 days" placement="top">
+                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                 </Tooltip>
+                             </h3>
+                             <div className="metric-cards">
+                                 <div className="probability">
+                                     <h3>30 days</h3>
+                                     <p>{prediction?.readmission_30_day ? `${(prediction.readmission_30_day * 100).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                                 <div className="probability">
+                                     <h3>60 days</h3>
+                                     <p>{prediction?.readmission_60_day ? `${(prediction.readmission_60_day * 100).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+ 
+                     {/* Form Section */}
+                     <div className="main-content">
+                         <div className="form-section">
+                         <h2>Select Model</h2>
+                         <select
+                             className="input-field"
+                             value={selectedModel}
+                             onChange={handleModelChange}
+                             disabled={!email}
+                         >
+                             <option value="">Select a model</option>
+                             {models.map((model) => (
+                                 <option key={model.modelid} value={model.modelid}>
+                                     {model.modelid}
+                                 </option>
+                             ))}
+                         </select>
+                         {errors.model && <p className="error-message">{errors.model}</p>}
+ 
+                             <h2>Gender</h2>
+                             <select 
+                                 className="input-field"
+                                 value={gender}
+                                 onChange={(e) => setGender(e.target.value)}>
+                                 <option value="">Select a gender</option>
+                                 <option value="male">Male</option>
+                                 <option value="female">Female</option>
+                             </select>
+                             {errors.gender && <p className="error-message">{errors.gender}</p>}
+ 
+                             <h2>Age</h2>
+                             <div className="input-container">
+                                 <input
+                                     className="input-field"
+                                     type="number"
+                                     value={age}
+                                     onChange={(e) => setAge(e.target.value)}
+                                     placeholder="Enter age"
+                                 />
+                             </div>
+                             {errors.age && <p className="error-message">{errors.age}</p>}
+                             
+                             <h2>Number of Times Admitted</h2>
+                             <div className="input-container">
+                                 <input
+                                     className="input-field"
+                                     type="number"
+                                     value={timesAdmitted}
+                                     onChange={(e) => setTimesAdmitted(e.target.value)}
+                                     placeholder="Enter times admitted"
+                                 />
+                             </div>
+                             {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
+ 
+                             <h2>Diagnostic Codes</h2>
                             <select 
                                 className="input-field" 
                                 onChange={handleSelectChange}
@@ -310,98 +317,97 @@ const Dashboard = ({ email }) => {
                                     </span>
                                 ))}
                             </div>
-
-                            <button className="predict-btn" onClick={handlePredict}>Predict</button>
-                        </div>
-                
-                         {/* Survival Probability Chart */}
-                         <div className= "chart-section">
-                          <div className="chart">
-                          <Plot
-                                data={survivalData.length > 0 ? [{
-                                    x: survivalData.map(d => d.days),
-                                    y: survivalData.map(d => d.Survival),
-                                    type: 'scatter',
-                                    mode: 'lines',
-                                    line: { width: 5 },
-                                    marker: { color: 'purple' }
-                                }] : []}
-                                layout={{
-                                    title: { 
-                                        text: 'Death Probability Curve', 
-                                        font: { size: 19 }, 
-                                        x: 0.5, 
-                                        xanchor: 'center'
-                                    },
-                                    xaxis: { 
-                                        title: { text: 'Time (Days)', font: { size: 17 } },
-                                        showgrid: true,
-                                        zeroline: true,
-                                    },
-                                    yaxis: { 
-                                        title: { text: 'Death Probability', font: { size: 17 } },
-                                        range: [0, 1],
-                                        showgrid: true,
-                                        zeroline: true,
-                                    },
-                                    annotations: survivalData.length === 0 ? [{
-                                        xref: 'paper', yref: 'paper',
-                                        x: 0.5, y: 0.5,
-                                        text: 'No data available',
-                                        showarrow: false,
-                                        font: { size: 20 }
-                                    }] : [],
-                                    margin: { t: 70, l: 100, r: 40, b: 80 },
-                                }}
-                            />
-                        {/* Readmission Probability Chart */}
-                        <div className="chart">
-                        <Plot
-                                data={survivalData.length > 0 ? [{
-                                    x: survivalData.map(d => d.days),
-                                    y: survivalData.map(d => d.Survival),
-                                    type: 'scatter',
-                                    mode: 'lines',
-                                    line: { width: 5 },
-                                    marker: { color: 'purple' }
-                                }] : []}
-                                layout={{
-                                    title: { 
-                                        text: 'Readmission Probability Curve', 
-                                        font: { size: 19 }, 
-                                        x: 0.5, 
-                                        xanchor: 'center'
-                                    },
-                                    xaxis: { 
-                                        title: { text: 'Time (Days)', font: { size: 17 } },
-                                        showgrid: true,
-                                        zeroline: true,
-                                    },
-                                    yaxis: { 
-                                        title: { text: 'Readmission Probability', font: { size: 17 } },
-                                        range: [0, 1],
-                                        showgrid: true,
-                                        zeroline: true,
-                                    },
-                                    annotations: survivalData.length === 0 ? [{
-                                        xref: 'paper', yref: 'paper',
-                                        x: 0.5, y: 0.5,
-                                        text: 'No data available',
-                                        showarrow: false,
-                                        font: { size: 20 }
-                                    }] : [],
-                                    margin: { t: 70, l: 100, r: 40, b: 80 },
-                                }}
-                            />
-                            </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
-
-export default Dashboard;
+                             <button className="predict-btn" onClick={handlePredict}>Predict</button>
+                         </div>
+                 
+                          {/* Survival Probability Chart */}
+                          <div className= "chart-section">
+                           <div className="chart">
+                           <Plot
+                                 data={survivalData.length > 0 ? [{
+                                     x: survivalData.map(d => d.days),
+                                     y: survivalData.map(d => d.Survival),
+                                     type: 'scatter',
+                                     mode: 'lines',
+                                     line: { width: 5 },
+                                     marker: { color: 'purple' }
+                                 }] : []}
+                                 layout={{
+                                     title: { 
+                                         text: 'Death Probability Curve', 
+                                         font: { size: 19 }, 
+                                         x: 0.5, 
+                                         xanchor: 'center'
+                                     },
+                                     xaxis: { 
+                                         title: { text: 'Time (Days)', font: { size: 17 } },
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     yaxis: { 
+                                         title: { text: 'Death Probability', font: { size: 17 } },
+                                         range: [0, 1],
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     annotations: survivalData.length === 0 ? [{
+                                         xref: 'paper', yref: 'paper',
+                                         x: 0.5, y: 0.5,
+                                         text: 'No data available',
+                                         showarrow: false,
+                                         font: { size: 20 }
+                                     }] : [],
+                                     margin: { t: 70, l: 100, r: 40, b: 80 },
+                                 }}
+                             />
+                         {/* Readmission Probability Chart */}
+                         <div className="chart">
+                         <Plot
+                                 data={readmissionData.length > 0 ? [{
+                                     x: readmissionData.map(d => d.days),
+                                     y: readmissionData.map(d => d.Readmission),
+                                     type: 'scatter',
+                                     mode: 'lines',
+                                     line: { width: 5 },
+                                     marker: { color: 'purple' }
+                                 }] : []}
+                                 layout={{
+                                     title: { 
+                                         text: 'Readmission Probability Curve', 
+                                         font: { size: 19 }, 
+                                         x: 0.5, 
+                                         xanchor: 'center'
+                                     },
+                                     xaxis: { 
+                                         title: { text: 'Time (Days)', font: { size: 17 } },
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     yaxis: { 
+                                         title: { text: 'Readmission Probability', font: { size: 17 } },
+                                         range: [0, 1],
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     annotations: readmissionData.length === 0 ? [{
+                                         xref: 'paper', yref: 'paper',
+                                         x: 0.5, y: 0.5,
+                                         text: 'No data available',
+                                         showarrow: false,
+                                         font: { size: 20 }
+                                     }] : [],
+                                     margin: { t: 70, l: 100, r: 40, b: 80 },
+                                 }}
+                             />
+                             </div>
+                             </div>
+ 
+                         </div>
+                     </div>
+                 </>
+             )}
+         </div>
+     );
+ };
+ 
+ export default Dashboard;
