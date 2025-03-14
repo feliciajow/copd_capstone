@@ -25,6 +25,7 @@ function Header({email, handleLogin}) {
         <button className="login-btn" onClick={() => {
           if (email){
             handleLogin(null);
+            localStorage.removeItem('email');
           } navigate('/'); //if no email then logout and navigate to login page
         }}>
           {email ? 'Logout' : 'Login'}
@@ -38,10 +39,7 @@ function App() {
   const [email, setEmail] = useState(null);
   //everytime website refresh retrieve email 
   useEffect(()=>{
-    const storedEmail = localStorage.getItem('email')
-    if (storedEmail){
-      setEmail(storedEmail);
-    }
+    setEmail(null);
   },[]);
 
   const handleLogin = (useremail) => {
