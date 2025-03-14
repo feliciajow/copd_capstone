@@ -1,9 +1,9 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CloudUploadOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { Upload, Button, Alert, message, Tooltip, Select} from 'antd';
+import { Upload, Button, Alert, message, Tooltip, Select, Input, Row, Col } from 'antd';
 import ExcelTemplate from './downloadExcel';
 import * as XLSX from "xlsx";
-import icd10Excel from "./icd10_code.xlsx"; 
+import icd10Excel from "./icd10_code.xlsx";
 import './style.css';
 
 const { Dragger } = Upload;
@@ -13,12 +13,13 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadAlert, setUploadAlert] = useState(null);
-  const [diagnosticInterest, setDiagnosticInterest] = useState("J44"); 
+  const [modelName, setModelName] = useState("");
+  const [diagnosticInterest, setDiagnosticInterest] = useState("J44");
   const [diagnosticOptions, setDiagnosticOptions] = useState([
     { code: "J44", description: "COPD" },
     { code: "I10", description: "Hypertension" },
     { code: "E11", description: "Diabetes Mellitus" }
-  ]); 
+  ]);
 
   // Function to load and parse the Excel file
   const loadICDCodesFromFile = async () => {
@@ -79,7 +80,15 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
     loadICDCodesFromFile();
   }, []);
 
+  const handleModelNameChange = (e) => {
+    setModelName(e.target.value);
+  };
+
   const handleUpload = () => {
+    if (!modelName) {
+      message.warning('Model name is required');
+      return;
+    }
     if (fileList.length === 0) {
       message.warning('No file selected for upload.');
       return;
@@ -88,8 +97,9 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
     const formData = new FormData();
     formData.append('file', fileList[0]); // Ensure we upload the raw file
     console.log("Uploading file:", fileList[0]);
-    formData.append("diagnostic_interest", diagnosticInterest); 
-
+    formData.append("diagnostic_interest", diagnosticInterest);
+    formData.append("model_name", modelName);
+    console.log("Model Name:", modelName);
     console.log("Selected Diagnostic Interest:", diagnosticInterest);
 
     setUploading(true);
@@ -101,7 +111,8 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
       .then((res) => res.json())
       .then(() => {
         setFileList([]);
-        setUploadAlert(null); 
+        setUploadAlert(null);
+        setModelName('');
       })
       .catch(() => {
         message.error('Upload failed.');
@@ -168,31 +179,54 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
       <div className="card-container">
         <ExcelTemplate />
         <br />
-
-        <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block" }}>
-          Select Diagnostic Interest:
-        </label>
-        <Select
-          showSearch
-          value={diagnosticInterest}
-          onChange={(value) => {
-            const shortCode = value.substring(0, 3); // Extract first 3 letters
-            setDiagnosticInterest(shortCode);
-          }}
-          style={{ width: "100%", marginBottom: "16px" }}
-          placeholder="Search or select a diagnostic code"
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            String(option.children).toLowerCase().includes(input.toLowerCase())
-          }
-        >
-          {diagnosticOptions.map(({ code, description }) => (
-            <Option key={code} value={code}>
-              {`${code} (${description})`}
-            </Option>
-          ))}
-        </Select>
-
+        <Row>
+          <Col md={6}>
+            <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block", textAlign: "left" }}>
+              Name Your Model:
+            </label>
+            <Tooltip
+              trigger={['focus']}
+              title="Model name should be no longer than 10 characters"
+              placement="topLeft"
+            >
+            <Input
+              type="text"
+              placeholder="Enter model name"
+              value={modelName}
+              onChange={handleModelNameChange}
+              maxLength={10}
+              style={{ width: "100%", marginBottom: "16px", padding: "8px" }}
+            />
+            </Tooltip>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={6}>
+            <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block", textAlign: "left" }}>
+              Select Diagnostic Interest:
+            </label>
+            <Select
+              showSearch
+              value={diagnosticInterest}
+              onChange={(value) => {
+                const shortCode = value.substring(0, 3); // Extract first 3 letters
+                setDiagnosticInterest(shortCode);
+              }}
+              style={{ width: "100%", marginBottom: "16px", textAlign: "left" }}
+              placeholder="Search or select a diagnostic code"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                String(option.children).toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {diagnosticOptions.map(({ code, description }) => (
+                <Option key={code} value={code}>
+                  {`${code} (${description})`}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+        </Row>
         <Dragger {...uploadProps}>
           <p className="ant-upload-drag-icon">
             <CloudUploadOutlined />
@@ -202,17 +236,17 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
             Support for a single file upload. Supported formats include csv, xls, or xlsx
           </p>
         </Dragger>
-        
+
         <Button
           className="btns"
-          style={{ width: '20%'}}
+          style={{ width: '20%' }}
           type="primary"
           onClick={async () => {
-            await handleUpload(); 
-            uploadModel();
+            await handleUpload();
+            uploadModel(modelName);
           }}
           loading={uploading}
-          disabled={fileList.length === 0}
+          disabled={fileList.length === 0 || !modelName}
         >
           Upload File
         </Button>

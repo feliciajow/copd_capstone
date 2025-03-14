@@ -62,6 +62,13 @@ const Models = ({ email }) => {
             fixed: 'left',
         },
         {
+            title: 'Model Name',
+            dataIndex: 'model_name',
+            key: 'model_name',
+            width: '15%',
+            fixed: 'left',
+        },
+        {
             title: 'C Index',
             dataIndex: 'c_index',
             key: 'c_index',
@@ -111,13 +118,13 @@ const Models = ({ email }) => {
                                 </Tooltip>
                             </h1>
                         </Col>
-                        <Col span={14}>
+                        <Col span={15}>
                         </Col>
                         <Col span={2}>
                             <Button type="default" onClick={fetchModels}>Refresh</Button>
                         </Col>
-                        <Col span={3}>
-                            <Button type="primary" onClick={() => navigate('/retrain')}>+ Train New Model</Button>
+                        <Col span={2}>
+                            <Button style={{backgroundColor:"#29b6f6", color:"white"}} onClick={() => navigate('/retrain')}>+ Train New Model</Button>
                         </Col>
                     </Row>
                     

@@ -13,13 +13,15 @@ const Retrain = ({ email }) => {
     const [current, setCurrent] = useState(0);
     //store uploaded excel file
     const [file, setFile] = useState(null);
+    const [modelName, setModelName] = useState("");
     const prev = () => {
         setCurrent((prev) => prev - 1);
 
     };
     
-    const uploadModel = () => {
+    const uploadModel = (name) => {
         setfileupload(true);
+        setModelName(name);
         setCurrent((prev) => prev + 1);
         console.log('File uploaded successfully');
     };
@@ -35,7 +37,7 @@ const Retrain = ({ email }) => {
         },
         {
             title: 'Preview file',
-            content:  <PreviewFile file={file} proceed={proceed} prev={prev}/>, 
+            content:  <PreviewFile file={file} modelName={modelName} proceed={proceed} prev={prev}/>, 
         },
         {
             title: 'Train Model',

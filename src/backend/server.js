@@ -17,7 +17,7 @@ const client = new Client({
   user: "postgres",
   port: 5432,
   password: "cghrespi",
-  database: "postgres"
+  database: "cghdb"
 })
 client.connect();
 
@@ -103,7 +103,7 @@ app.get("/model", async (req, res) => {
   try {
     const result = await client.query(
 
-      `Select m.modelid, m.c_index, m.timestamp, m.expire_date 
+      `Select m.modelid, m.model_name, m.c_index, m.timestamp, m.expire_date 
       From models m`
     );
     if (result.rows.length === 0) {

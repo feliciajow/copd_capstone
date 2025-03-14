@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'antd';
 import axios from "axios";
 import './dashboard.css';
+import './style.css';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert} from 'antd';
 import Plot from 'react-plotly.js';
@@ -198,8 +199,9 @@ const Dashboard = ({ email }) => {
      return (
          <div className="dashboard-container">
              {loading ? (
-                 <div className="loading-overlay">
+                 <div className="loading">
                      <Spin size="large" />
+                     <h2>Please wait patiently for the generated results...</h2>
                  </div>
              ) : (
                  <>
@@ -246,7 +248,7 @@ const Dashboard = ({ email }) => {
                      {/* Form Section */}
                      <div className="main-content">
                          <div className="form-section">
-                         <h2>Select Model</h2>
+                         <h2>Select Model To Use</h2>
                          <select
                              className="input-field"
                              value={selectedModel}
@@ -256,7 +258,7 @@ const Dashboard = ({ email }) => {
                              <option value="">Select a model</option>
                              {models.map((model) => (
                                  <option key={model.modelid} value={model.modelid}>
-                                     {model.modelid}
+                                     ID: {model.modelid} - {model.model_name}
                                  </option>
                              ))}
                          </select>

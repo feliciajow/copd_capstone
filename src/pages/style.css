@@ -37,6 +37,22 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.loading h2 {
+    margin-top: 20px;
+}
+
 .card-container {
     background: #fff;
     border-radius: 10px;
@@ -65,4 +81,18 @@
     margin-top: 2%;
     padding-left: 65%;
 
+}
+
+.refresh{
+        font-size: 16px; 
+        font-weight: bold;
+        background-color:#29b6f6;
+        color: white;
+        margin-top: 20px;
+        border: none;
+        /* padding: 12px 25px; */
+        border-radius: 10px;
+        height: 50px;
+        width: 400px;
+        font-family: Georgia, 'Times New Roman', Times, serif
 }

@@ -3,7 +3,7 @@ import { Alert, Button } from 'antd';
 import * as XLSX from 'xlsx';
 import { Table, Spin } from 'antd';
 
-const PreviewFile = ({ file, proceed, prev }) => {
+const PreviewFile = ({ file, modelName, proceed, prev }) => {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,10 +23,12 @@ const PreviewFile = ({ file, proceed, prev }) => {
   ];
 
   const handleProceed = async () => {
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:5002/train", {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ modelName })
       });
       const result = await response.text();
       if (response.ok) {
@@ -39,6 +41,9 @@ const PreviewFile = ({ file, proceed, prev }) => {
       alert("Failed to start model training. Please try again!");
       console.error(error);
     }
+    finally {
+    setLoading(false);
+  }
   };
   
   useEffect(() => {
@@ -138,7 +143,10 @@ const PreviewFile = ({ file, proceed, prev }) => {
     <div>
       {error && <Alert message={error} type="error" showIcon />}
       {loading ? (
-        <Spin size="large" style={{ display: 'block', margin: '30px auto' }} />
+        <div className="loading">
+          <Spin size="large" style={{ display: 'block', margin: '30px auto' }} />
+          <h2>Please wait patiently and do not leave this page...</h2>
+        </div>
       ) : (
         <>
           {!error && (

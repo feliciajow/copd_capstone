@@ -11,7 +11,7 @@ const TrainModel = ({}) => {
       title="Model Successfully Trained!"
       subTitle="Please visit the Models page to view your trained model."
       extra={[
-        <Button className="btns" style={{ width: '20%'}} type="primary" onClick={() => navigate('/Models')}>
+        <Button className="btns" style={{ width: '20%', color:"white", backgroundColor:"#29b6f6"}} type="primary" onClick={() => navigate('/Models')}>
           Go To Models Page
         </Button>
       ]}

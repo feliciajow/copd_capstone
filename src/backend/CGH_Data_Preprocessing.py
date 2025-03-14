@@ -31,15 +31,17 @@ TEMP_DIR = "temp"
 
 
 DB_CONFIG = {
-    "database": "postgres",
+    "database": "cghdb",
     "user": "postgres",
     "password": "cghrespi",
     "host": "localhost",
     "port": "5432",
 }
 
+
 @app.route("/fileUpload", methods=["POST"])
 def death_upload_file():
+    
     if "file" not in request.files or request.files["file"].filename == "":
         return jsonify({"message": "No file part in request"}), 400
 
@@ -366,10 +368,13 @@ def death_upload_file():
 
 @app.route("/train", methods=["POST"])
 def train():    
+    data = request.get_json()
+    model_name = data.get("modelName", "default_model")
+    print(f"Model Name: {model_name}")
+
     # Connect to database 
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
-
     # Fetch userid and email from users table
     cur.execute("SELECT userid, email FROM users")
     users = cur.fetchall()
@@ -456,19 +461,23 @@ def train():
     expire_date = datetime.now() + timedelta(days=30)
 
     compressed_models_binary = gzip.compress(combined_models_binary)  # Compress the data
+    
 
     # Insert into PostgreSQL
     cur.execute("""
-        INSERT INTO models (timestamp, model_data, c_index, expire_date)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO models (model_name, timestamp, model_data, c_index, expire_date)
+        VALUES (%s, %s, %s, %s, %s)
         RETURNING modelid;
-    """, (datetime.now(), compressed_models_binary, death_c_index, expire_date))
+    """, (model_name, datetime.now(), compressed_models_binary, death_c_index, expire_date))
 
     #Retrieve the new modelid
     modelid = cur.fetchone()[0]
+    print(modelid)
+    model_path = os.path.join(TEMP_DIR, f"model_{modelid}.pkl")
+    with open(model_path, "wb") as f:
+        f.write(compressed_models_binary)
+    print(f"Model saved to {model_path}")
     conn.commit()
-
-    # print(f"Model saved in database for User - ID: {userid}, Email: {email} (Model ID: {modelid})")
     return f"Model Training Successful! Model ID: {modelid} {expire_date}", 200
 
 @app.route("/predict", methods=["POST"])
