@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip } from 'antd';
+import { Tooltip, message } from 'antd';
 import axios from "axios";
 import './dashboard.css';
 import './style.css';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert} from 'antd';
 import Plot from 'react-plotly.js';
-import icd10Data from "./icd10_codes.json";
+import * as XLSX from "xlsx";
+import icd10Excel from "./icd10_code.xlsx";
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
@@ -21,8 +22,14 @@ const Dashboard = ({ email }) => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [alertMessage, setAlertMessage] = useState(null);
+    const [diagnosticOptions, setDiagnosticOptions] = useState([
+        { code: "J44", description: "COPD" },
+        { code: "I10", description: "Hypertension" },
+        { code: "E11", description: "Diabetes Mellitus" }
+    ]);
 
     useEffect(() => {
+        loadICDCodesFromFile();
         console.log("Email in Dashboard:", email);
         if (email) {
             fetchModels(); 
@@ -159,8 +166,67 @@ const Dashboard = ({ email }) => {
     //     days: day,
     //     Survival: prediction.survival_curve.probability[index]
     // })) || [];
+    
+    const loadICDCodesFromFile = async () => {
+        try {
+          const response = await fetch(icd10Excel);
+          const blob = await response.blob();
+    
+          const reader = new FileReader();
+          reader.readAsBinaryString(blob);
+    
+          reader.onload = (e) => {
+            const binaryStr = e.target.result;
+            const workbook = XLSX.read(binaryStr, { type: "binary" });
+    
+            if (workbook.SheetNames.length === 0) {
+              throw new Error("No sheets found in the Excel file.");
+            }
+    
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+    
+            if (!worksheet) {
+              throw new Error("Sheet is empty or invalid.");
+            }
+    
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+            if (jsonData.length === 0) {
+              throw new Error("Excel file has no data.");
+            }
+    
+            // Extract ICD-10 codes
+            const extractedCodes = jsonData.map(row => {
+              if (row["ICD-10 Combined"]) {
+                const [code, ...descParts] = row["ICD-10 Combined"].split(": ");
+                return { code, description: descParts.join(": ") || "No description available" };
+              }
+              return null;
+            }).filter(Boolean);
+    
+            setDiagnosticOptions((prevOptions) => {
+              const newOptions = [...prevOptions, ...extractedCodes].filter((item, index, self) =>
+                index === self.findIndex((t) => t.code === item.code)
+              );
+              return newOptions;
+            });
+    
+            message.success("ICD-10 codes loaded from Excel file!");
+          };
+        } catch (error) {
+          console.error("Error loading Excel file:", error);
+          message.error("Error loading ICD-10 codes: " + error.message);
+        }
+      };
 
-     const generateSurvivalCurve = () => {
+    const getDiagnosticDescription = (code) => {
+        // compare diagnostic code with the diagnostic code in the excel return its description
+        const codeOption = diagnosticOptions.find((option) => option.code === code);
+        return codeOption ? codeOption.description : 'Description not available';
+    };
+    
+    const generateSurvivalCurve = () => {
          if (!prediction || !prediction.death_curve) {
              console.log("No survival curve data available");
              return [];
@@ -253,7 +319,6 @@ const Dashboard = ({ email }) => {
                              className="input-field"
                              value={selectedModel}
                              onChange={handleModelChange}
-                             disabled={!email}
                          >
                              <option value="">Select a model</option>
                              {models.map((model) => (
@@ -303,10 +368,11 @@ const Dashboard = ({ email }) => {
                             <select 
                                 className="input-field" 
                                 onChange={handleSelectChange}
+                                showSearch
                                 value="">
                                 <option value="">Choose codes</option>
                                 {diagnosticCodes.map((code) => (
-                                    <option key={code} value={code}>{code}</option>
+                                    <option key={code} value={code}>{code} - {getDiagnosticDescription(code)}</option>
                                 ))}
                             </select>
                             {errors.diagnosticCodes && <p className="error-message">{errors.diagnosticCodes}</p>}
