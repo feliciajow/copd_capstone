@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Row, Col, Form, Input, Alert } from 'antd';
-import './style.css';
+import '../styles/style.css';
 import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {

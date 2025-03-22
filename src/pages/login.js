@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Row, Col, Form, Input, Flex, Modal, Result, Alert } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import './style.css';
+import '../styles/style.css';
 import Dashboard from './dashboard';
 
 const Login = ({ handleLogin }) => {

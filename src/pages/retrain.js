@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Steps, Alert, message } from 'antd';
-import UploadFile from './UploadFile'; 
-import PreviewFile from './PreviewFile';
-import TrainModel from './TrainModel';
+import UploadFile from './uploadFile'; 
+import PreviewFile from './previewFile';
+import TrainModel from './trainModel';
 
 const Retrain = ({ email }) => {
     //check if file has been uploaded

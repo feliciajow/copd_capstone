@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navig
 import './App.css';
 import About from './pages/about';
 import Dashboard from './pages/dashboard';
-import Models from './pages/Models';
+import Models from './pages/models';
 import Retrain from './pages/retrain';
 import Login from './pages/login';
-import Signup from './pages/signup';
+import Signup from './pages/signUp';
 
 function Header({email, handleLogin}) {
   const navigate = useNavigate();

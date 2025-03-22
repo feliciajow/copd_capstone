@@ -3,8 +3,8 @@ import { CloudUploadOutlined, DownloadOutlined, InfoCircleOutlined } from '@ant-
 import { Upload, Button, Alert, message, Tooltip, Select, Input, Row, Col } from 'antd';
 import ExcelTemplate from './downloadExcel';
 import * as XLSX from "xlsx";
-import icd10Excel from "./icd10_code.xlsx";
-import './style.css';
+import icd10Excel from "../data/icd10_code.xlsx";
+import '../styles/style.css';
 
 const { Dragger } = Upload;
 const { Option } = Select;

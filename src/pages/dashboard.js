@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, message } from 'antd';
 import axios from "axios";
-import './dashboard.css';
-import './style.css';
+import '../styles/dashboard.css';
+import '../styles/style.css';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert} from 'antd';
 import Plot from 'react-plotly.js';
 import * as XLSX from "xlsx";
-import icd10Excel from "./icd10_code.xlsx";
+import icd10Excel from "../data/icd10_code.xlsx";
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
@@ -468,6 +468,8 @@ const Dashboard = ({ email }) => {
                                  }}
                              />
                              </div>
+
+                             
                              </div>
  
                          </div>
