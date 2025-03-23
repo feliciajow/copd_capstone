@@ -17,7 +17,6 @@
     background-color: #f4f4f4; 
     border-radius: 5px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    /* transition: opacity 0.3s ease; */
   }
   
   .results-group {
@@ -102,6 +101,11 @@
       border: 1px solid #ccc;
       color: gray;
       font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    .input-field:disabled {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
     }
   
     .selected-codes-container {

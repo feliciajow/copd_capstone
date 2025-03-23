@@ -111,9 +111,9 @@ const Models = ({ email }) => {
     return (
         <div>
             <br />
-            <div className = "alerts" style={{ padding: '1%' }}>{alert}</div>
+            {/* <div className = "alerts" style={{ padding: '1%' }}>{alert}</div> */}
             {!email ? (
-                <Alert description="You have to login to your account to view models." type="info" showIcon />
+                <div style={{ padding: '3%' }}><Alert description="You have to login to your account to view models." type="info" showIcon /></div>
             ) : (
                 <>
                 <div className="model-card">
