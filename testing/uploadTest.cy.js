@@ -8,7 +8,7 @@ import 'cypress-file-upload';
 describe('Testing of Upload File Page', () => {
   beforeEach(() => {
     cy.viewport(1200, 1000);
-    cy.mount(<Retrain email="sihui@gmail.com" />);
+    cy.mount(<Retrain email="sihuii2709@gmail.com" />);
   });
 
   it('Rendering of Upload File Page', () => {
