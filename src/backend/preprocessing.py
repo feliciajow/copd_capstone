@@ -31,7 +31,7 @@ TEMP_DIR = "temp"
 
 
 DB_CONFIG = {
-    "database": "cghdb",
+    "database": "postgres",
     "user": "postgres",
     "password": "cghrespi",
     "host": "localhost",

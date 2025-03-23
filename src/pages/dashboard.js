@@ -31,9 +31,7 @@ const Dashboard = ({ email }) => {
     useEffect(() => {
         loadICDCodesFromFile();
         console.log("Email in Dashboard:", email);
-        if (email) {
-            fetchModels(); 
-        }
+        fetchModels(); 
     }, [email]);
 
     // Fetch trained models from backend
@@ -64,6 +62,10 @@ const Dashboard = ({ email }) => {
                     );
                     setSelectedModel(latestModel.modelid);
                     console.log("Auto-selected latest model for guest:", latestModel.modelid);
+                        // Wait for state update before predicting
+                    setTimeout(() => {
+                        handlePredict();
+                    }, 100); 
                 }
             } else {
                 console.warn("No models found in the database");
@@ -126,7 +128,7 @@ const Dashboard = ({ email }) => {
         let validationErrors = {};
         const genderMapped = gender === "female" ? 1 : gender === "male" ? 0 : null;
 
-        if (!selectedModel) validationErrors.model = "*Model selection is required";
+        if (!selectedModel && email) validationErrors.model = "*Model selection is required";
         if (genderMapped === null) validationErrors.gender = "*Gender is required";
         if (!age || parseInt(age) <= 0) validationErrors.age = "*Age is required";
         if (!timesAdmitted || parseInt(timesAdmitted) <= 0) validationErrors.timesAdmitted = "*Number of admissions is required";
@@ -162,7 +164,7 @@ const Dashboard = ({ email }) => {
         }
     };
 
-    // const survivalData = prediction?.survival_curve?.time?.map((day, index) => ({
+    // const deathData = prediction?.survival_curve?.time?.map((day, index) => ({
     //     days: day,
     //     Survival: prediction.survival_curve.probability[index]
     // })) || [];
@@ -226,20 +228,21 @@ const Dashboard = ({ email }) => {
         return codeOption ? codeOption.description : 'Description not available';
     };
     
-    const generateSurvivalCurve = () => {
+    const generateDeathCurve = () => {
          if (!prediction || !prediction.death_curve) {
-             console.log("No survival curve data available");
+             console.log("No death curve data available");
              return [];
          }
      
-         const survivalData = prediction.death_curve.time.map((day, index) => ({
+         const deathData = prediction.death_curve.time.map((day, index) => ({
              days: day,
-             Survival: 1 - prediction.death_curve.probability[index], 
-         }));
+             death: 1- prediction.death_curve.probability[index], 
+         }))
+         .filter((point) => point.days <= 365);
      
-         console.log("Survival Data for Graph:", survivalData); 
+         console.log("Death Data for Graph:", deathData); 
      
-         return survivalData;
+         return deathData;
      };
  
  
@@ -252,14 +255,15 @@ const Dashboard = ({ email }) => {
          const readmissionData = prediction.readmission_curve.time.map((day, index) => ({
              days: day,
              Readmission: 1 - prediction.readmission_curve.probability[index], 
-         }));
+         }))
+         .filter((point) => point.days <= 300);
      
          console.log("Readmission Data for Graph:", readmissionData); 
      
          return readmissionData;
      };
  
-     const survivalData = generateSurvivalCurve();
+     const deathData = generateDeathCurve();
      const readmissionData = generateReadmissionCurve();
  
      return (
@@ -272,25 +276,6 @@ const Dashboard = ({ email }) => {
              ) : (
                  <>
                      <div className="results-container">
-                         <div className="results-group estimated-survival">
-                             <h3>
-                                 Estimated Survival{' '}
-                                 <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
-                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
-                                 </Tooltip>
-                             </h3>
-                             <div className="metric-cards">
-                                 <div className="probability">
-                                     <h3>6 month</h3>
-                                     <p>{prediction?.death_6_month ? `${(prediction.death_6_month * 100).toFixed(1)}%` : "N/A"}</p>
-                                 </div>
-                                 <div className="probability">
-                                     <h3>12 month</h3>
-                                     <p>{prediction?.death_12_month ? `${(prediction.death_12_month * 100).toFixed(1)}%` : "N/A"}</p>
-                                 </div>
-                             </div>
-                         </div>
- 
                          <div className="results-group estimated-readmission">
                              <h3>
                                  Estimated Readmission{' '}
@@ -309,6 +294,25 @@ const Dashboard = ({ email }) => {
                                  </div>
                              </div>
                          </div>
+
+                         <div className="results-group estimated-survival">
+                             <h3>
+                                 Estimated Death{' '}
+                                 <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
+                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                                 </Tooltip>
+                             </h3>
+                             <div className="metric-cards">
+                                 <div className="probability">
+                                     <h3>6 month</h3>
+                                     <p>{(prediction?.death_6_month) ? `${(100 - (prediction.death_6_month * 100)).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                                 <div className="probability">
+                                     <h3>12 month</h3>
+                                     <p>{prediction?.death_12_month ? `${(100 - (prediction.death_12_month * 100)).toFixed(1)}%` : "N/A"}</p>
+                                 </div>
+                             </div>
+                         </div>
                      </div>
  
                      {/* Form Section */}
@@ -319,6 +323,7 @@ const Dashboard = ({ email }) => {
                              className="input-field"
                              value={selectedModel}
                              onChange={handleModelChange}
+                             disabled={!email} 
                          >
                              <option value="">Select a model</option>
                              {models.map((model) => (
@@ -385,49 +390,12 @@ const Dashboard = ({ email }) => {
                                     </span>
                                 ))}
                             </div>
-                             <button className="predict-btn" onClick={handlePredict}>Predict</button>
+                             <button className="predict-btn" onClick={handlePredict} >Predict</button>
                          </div>
                  
-                          {/* Survival Probability Chart */}
+                          
                           <div className= "chart-section">
-                           <div className="chart">
-                           <Plot
-                                 data={survivalData.length > 0 ? [{
-                                     x: survivalData.map(d => d.days),
-                                     y: survivalData.map(d => d.Survival),
-                                     type: 'scatter',
-                                     mode: 'lines',
-                                     line: { width: 5 },
-                                     marker: { color: 'purple' }
-                                 }] : []}
-                                 layout={{
-                                     title: { 
-                                         text: 'Death Probability Curve', 
-                                         font: { size: 19 }, 
-                                         x: 0.5, 
-                                         xanchor: 'center'
-                                     },
-                                     xaxis: { 
-                                         title: { text: 'Time (Days)', font: { size: 17 } },
-                                         showgrid: true,
-                                         zeroline: true,
-                                     },
-                                     yaxis: { 
-                                         title: { text: 'Death Probability', font: { size: 17 } },
-                                         range: [0, 1],
-                                         showgrid: true,
-                                         zeroline: true,
-                                     },
-                                     annotations: survivalData.length === 0 ? [{
-                                         xref: 'paper', yref: 'paper',
-                                         x: 0.5, y: 0.5,
-                                         text: 'No data available',
-                                         showarrow: false,
-                                         font: { size: 20 }
-                                     }] : [],
-                                     margin: { t: 70, l: 100, r: 40, b: 80 },
-                                 }}
-                             />
+                     
                          {/* Readmission Probability Chart */}
                          <div className="chart">
                          <Plot
@@ -436,9 +404,36 @@ const Dashboard = ({ email }) => {
                                      y: readmissionData.map(d => d.Readmission),
                                      type: 'scatter',
                                      mode: 'lines',
+                                     name: 'Readmission Curve',
                                      line: { width: 5 },
-                                     marker: { color: 'purple' }
-                                 }] : []}
+                                     marker: { color: 'purple' }},
+                                     {
+                                        x: [30],
+                                        y: [(prediction?.readmission_30_day|| 0)],
+                                        type: 'scatter',
+                                        mode: 'markers+text',
+                                        marker: { color: 'red', size: 10 },
+                                        name: '30 Days',
+                                        text: ['Day 30'],
+                                        textposition: 'top center',
+                                        hovertemplate:
+                                          'Day: %{x}<br>Readmission: %{y:.2%}<extra>30 Days</extra>'
+                                      },
+                                      {
+                                        x: [60],
+                                        y: [(prediction?.readmission_60_day || 0)],
+                                        type: 'scatter',
+                                        mode: 'markers+text',
+                                        marker: { color: 'green', size: 10 },
+                                        name: '60 Days',
+                                        text: ['Day 60'],
+                                        textposition: 'top center',
+                                        hovertemplate:
+                                          'Day: %{x}<br>Readmission: %{y:.2%}<extra>60 Days</extra>'
+                                      }
+                                    ]
+                                  : []
+                              }
                                  layout={{
                                      title: { 
                                          text: 'Readmission Probability Curve', 
@@ -458,6 +453,74 @@ const Dashboard = ({ email }) => {
                                          zeroline: true,
                                      },
                                      annotations: readmissionData.length === 0 ? [{
+                                         xref: 'paper', yref: 'paper',
+                                         x: 0.5, y: 0.5,
+                                         text: 'No data available',
+                                         showarrow: false,
+                                         font: { size: 20 }
+                                     }] : [],
+                                     margin: { t: 70, l: 100, r: 40, b: 80 },
+                                 }}
+                             />
+
+                            {/* Death Probability Chart */}
+                           <div className="chart">
+                           <Plot
+                                 data={deathData.length > 0 ? [{
+                                     x: deathData.map(d => d.days),
+                                     y: deathData.map(d => d.death),
+                                     type: 'scatter',
+                                     mode: 'lines',
+                                     name: 'Death Curve',
+                                     line: { width: 5 },
+                                     marker: { color: 'purple' }},
+                                     {
+                                        x: [180],
+                                        y: [(1-(prediction?.death_6_month) || 0)],
+                                        type: 'scatter',
+                                        mode: 'markers+text',
+                                        marker: { color: 'red', size: 10 },
+                                        name: '6 Month',
+                                        text: ['Day 180'],
+                                        textposition: 'top center',
+                                        hovertemplate:
+                                          'Day: %{x}<br>Death: %{y:.2%}<extra>6 Month</extra>'
+                                      },
+                                      {
+                                        x: [365],
+                                        y: [(1- (prediction?.death_12_month) || 0)],
+                                        type: 'scatter',
+                                        mode: 'markers+text',
+                                        marker: { color: 'green', size: 10 },
+                                        name: '12 Month',
+                                        text: ['Day 365'],
+                                        textposition: 'top center',
+                                        hovertemplate:
+                                          'Day: %{x}<br>Death: %{y:.2%}<extra>12 Month</extra>'
+                                      }
+                                    ]
+                                  : []
+                              }
+                                 layout={{
+                                     title: { 
+                                         text: 'Death Probability Curve', 
+                                         font: { size: 19 }, 
+                                         x: 0.5, 
+                                         xanchor: 'center'
+                                     },
+                                     xaxis: { 
+                                         title: { text: 'Time (Days)', font: { size: 17 } },
+                                         range: [0, 400],
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     yaxis: { 
+                                         title: { text: 'Death Probability', font: { size: 17 } },
+                                         range: [0, 1],
+                                         showgrid: true,
+                                         zeroline: true,
+                                     },
+                                     annotations: deathData.length === 0 ? [{
                                          xref: 'paper', yref: 'paper',
                                          x: 0.5, y: 0.5,
                                          text: 'No data available',

@@ -69,7 +69,14 @@ const Models = ({ email }) => {
             fixed: 'left',
         },
         {
-            title: 'C Index',
+            title: (
+                <>
+                    C Index{' '}
+                    <Tooltip title="Concordance index (C-index) indicates model performance. The higher, the better." placement="top">
+                        <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
+                    </Tooltip>
+                </>
+            ),
             dataIndex: 'c_index',
             key: 'c_index',
             width: '15%',

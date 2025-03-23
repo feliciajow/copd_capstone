@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 const pool = new Pool({
     user: "postgres",
     host: "localhost",
-    database: "cghdb",
+    database: "postgres",
     password: "cghrespi",
     port: 5432,
 });
@@ -101,12 +101,31 @@ app.get("/diagnostic-codes", async (req, res) => {
 
 // predict
 app.post("/predict", async (req, res) => {
-    const {modelid, gender, age, readmissions, diagnosticCodes } = req.body;
+    let {modelid, gender, age, readmissions, diagnosticCodes } = req.body;
 
-    if (!modelid || gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
-        return res.status(400).json({ error: "All input fields are required" });
-    }
+    // if (!modelid || gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
+    //     return res.status(400).json({ error: "All input fields are required" });
+    // }
     try {
+        // if no model ID provided because use guest, use latest model
+        if (!modelid) {
+            const result = await pool.query(`
+                SELECT modelid FROM models
+                ORDER BY timestamp DESC
+                LIMIT 1
+            `);
+            if (result.rows.length === 0) {
+                return res.status(400).json({ error: "No models found in database." });
+            }
+            modelid = result.rows[0].modelid;
+            console.log("Using latest model for guest:", modelid);
+        }
+
+        // Validation after fallback
+        if (gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
+            return res.status(400).json({ error: "All input fields are required" });
+        }
+
         // Fetch all possible diagnostic codes
         const allDiagnosticCodes = await getDiagnosticCodes();
 
