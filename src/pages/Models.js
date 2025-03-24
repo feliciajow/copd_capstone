@@ -96,16 +96,16 @@ const Models = ({ email }) => {
             },
         },
         
-        {
-            title: 'Expiration Date',
-            dataIndex: 'expire_date',
-            key: 'expire_date',
-            width: '15%',
-            render: (text) => new Date(text).toLocaleString(),
-            sorter: {
-                compare: (a, b) => new Date(a.expire_date).getTime() - new Date(b.expire_date).getTime()
-            },
-        },
+        // {
+        //     title: 'Expiration Date',
+        //     dataIndex: 'expire_date',
+        //     key: 'expire_date',
+        //     width: '15%',
+        //     render: (text) => new Date(text).toLocaleString(),
+        //     sorter: {
+        //         compare: (a, b) => new Date(a.expire_date).getTime() - new Date(b.expire_date).getTime()
+        //     },
+        // },
     ];
 
     return (

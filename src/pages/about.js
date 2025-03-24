@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/about.css'; 
+import { FolderOpenTwoTone, SettingTwoTone, LineChartOutlined, BulbTwoTone } from '@ant-design/icons';
 
 function About() {
   const navigate = useNavigate();
@@ -41,22 +42,22 @@ function About() {
 
         <div className="steps-grid">
           <div className="step-box">
-            <div className="step-icon">📁</div>
+            <div className="step-icon"><FolderOpenTwoTone twoToneColor="#e36134"/></div>
             <h4 className="step-title">Upload Data</h4>
             <p className="step-desc">Start by uploading patient data for preprocessing and analysis</p>
           </div>
           <div className="step-box">
-            <div className="step-icon">⚙️</div>
+            <div className="step-icon"><SettingTwoTone twoToneColor="#537ae8" /></div>
             <h4 className="step-title">Train Model</h4>
             <p className="step-desc">Leverage automated machine learning to build a tailored model optimized for accurate predictions</p>
           </div>
           <div className="step-box">
-            <div className="step-icon">📊</div>
+            <div className="step-icon"><LineChartOutlined /></div>
             <h4 className="step-title">Get Predictions</h4>
             <p className="step-desc">Access our interactive dashboard to generate precise predictions for readmission and mortality risk</p>
           </div>
           <div className="step-box">
-            <div className="step-icon">💡</div>
+            <div className="step-icon"><BulbTwoTone twoToneColor="#f7af30"/></div>
             <h4 className="step-title">Save Lives</h4>
             <p className="step-desc">Provide clinicians with timely insights to make informed, life-saving treatment decisions</p>
           </div>

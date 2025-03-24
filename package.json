@@ -53,6 +53,14 @@
     ]
   },
   "devDependencies": {
-    "cypress": "^14.2.0"
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@cypress/react": "^9.0.0",
+    "@cypress/webpack-dev-server": "^4.0.1",
+    "babel-loader": "^10.0.0",
+    "cypress": "^14.2.0",
+    "cypress-file-upload": "^5.0.8",
+    "webpack": "^5.98.0"
   }
 }
