@@ -33,6 +33,15 @@ describe('Viewing of Dashboard Page', () => {
     cy.get('select.input-field').last().select(2);
   });
 
+  it('Should be able to predict', () => {
+    cy.get('select.input-field').eq(1).select('male');
+    cy.get('input[placeholder="Enter age"]').type('45');
+    cy.get('input[placeholder="Enter times admitted"]').type('3');
+    cy.get('select.input-field').last().select(1);
+    cy.get('.predict-btn').click();
+    cy.get('.results-group').should('contain', '%');
+  })
+
   
   // it('Rendering of Upload File Page', () => {
   //   cy.get('.ant-steps-item').first().should('have.class', 'ant-steps-item-active');
