@@ -28,6 +28,13 @@ describe('Viewing of Dashboard Page', () => {
     cy.get('select.input-field').should('not.be.disabled');
   });
 
+  it('Model selection is allowed if account login', () => {
+    cy.mount(<Dashboard email="sihuii2709@gmail.com"/>);
+    cy.get('select.input-field').should('exist');
+    cy.get('select.input-field').should('not.be.disabled');
+    cy.get('select.input-field').should('contain','Select a model')
+  });
+
   it('Should be able to select the diagnostic codes from dropdown', () => {
     cy.get('select.input-field').last().select(1);
     cy.get('select.input-field').last().select(2);
@@ -39,8 +46,9 @@ describe('Viewing of Dashboard Page', () => {
     cy.get('input[placeholder="Enter times admitted"]').type('3');
     cy.get('select.input-field').last().select(1);
     cy.get('.predict-btn').click();
+    //if results not shown it will show N/A instead of %
     cy.get('.results-group').should('contain', '%');
-  })
+  });
 
   
   // it('Rendering of Upload File Page', () => {
