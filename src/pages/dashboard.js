@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, message } from 'antd';
+import { Tooltip, message, Row, Col } from 'antd';
 import axios from "axios";
 import '../styles/dashboard.css';
 import '../styles/style.css';
@@ -271,7 +271,7 @@ const Dashboard = ({ email }) => {
             {loading ? (
                 <div className="loading">
                     <Spin size="large" />
-                    <h2>Please wait patiently for the generated results...</h2>
+                    <h2>Please wait patiently...</h2>
                 </div>
             ) : (
                 <>
@@ -319,7 +319,7 @@ const Dashboard = ({ email }) => {
                     <div className="main-content">
                         <div className="form-section">
                             <h2>Select Model To Use{' '}
-                                <Tooltip title="The default model will be used if no account is logged in." placement="top">
+                                <Tooltip title="The default model will be used if no account is login." placement="top">
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
                             </h2>
@@ -389,7 +389,7 @@ const Dashboard = ({ email }) => {
                             <div className="selected-codes">
                                 {selectedCodes.map((code) => (
                                     <span key={code} className="selected-code">
-                                        {code}
+                                        {code} - {getDiagnosticDescription(code)}
                                         <button onClick={() => removeCode(code)}>X</button>
                                     </span>
                                 ))}
@@ -397,78 +397,83 @@ const Dashboard = ({ email }) => {
                             <button className="predict-btn" onClick={handlePredict} >Predict</button>
                         </div>
 
-
-                        <div className="chart-section">
-
+                        <Row className="chart-section">
                             {/* Readmission Probability Chart */}
-                            <div className="chart">
-                                <Plot
-                                    data={readmissionData.length > 0 ? [{
-                                        x: readmissionData.map(d => d.days),
-                                        y: readmissionData.map(d => d.Readmission),
-                                        type: 'scatter',
-                                        mode: 'lines',
-                                        name: 'Readmission Curve',
-                                        line: { width: 5 },
-                                        marker: { color: 'purple' }
-                                    },
-                                    {
-                                        x: [30],
-                                        y: [(prediction?.readmission_30_day || 0)],
-                                        type: 'scatter',
-                                        mode: 'markers+text',
-                                        marker: { color: 'red', size: 10 },
-                                        name: '30 Days',
-                                        text: ['Day 30'],
-                                        textposition: 'top center',
-                                        hovertemplate:
-                                            'Day: %{x}<br>Readmission: %{y:.2%}<extra>30 Days</extra>'
-                                    },
-                                    {
-                                        x: [60],
-                                        y: [(prediction?.readmission_60_day || 0)],
-                                        type: 'scatter',
-                                        mode: 'markers+text',
-                                        marker: { color: 'green', size: 10 },
-                                        name: '60 Days',
-                                        text: ['Day 60'],
-                                        textposition: 'top center',
-                                        hovertemplate:
-                                            'Day: %{x}<br>Readmission: %{y:.2%}<extra>60 Days</extra>'
-                                    }
-                                    ]
-                                        : []
-                                    }
-                                    layout={{
-                                        title: {
-                                            text: 'Readmission Probability Curve',
-                                            font: { size: 19 },
-                                            x: 0.5,
-                                            xanchor: 'center'
+                            <Col md={11}>
+                            <div className="chart-container">
+                                <div className="chart">
+                                    <Plot
+                                        data={readmissionData.length > 0 ? [{
+                                            x: readmissionData.map(d => d.days),
+                                            y: readmissionData.map(d => d.Readmission),
+                                            type: 'scatter',
+                                            mode: 'lines',
+                                            name: 'Readmission Curve',
+                                            line: { width: 5 },
+                                            marker: { color: 'purple' }
                                         },
-                                        xaxis: {
-                                            title: { text: 'Time (Days)', font: { size: 17 } },
-                                            showgrid: true,
-                                            zeroline: true,
+                                        {
+                                            x: [30],
+                                            y: [(prediction?.readmission_30_day || 0)],
+                                            type: 'scatter',
+                                            mode: 'markers+text',
+                                            marker: { color: 'red', size: 10 },
+                                            name: '30 Days',
+                                            text: ['Day 30'],
+                                            textposition: 'top center',
+                                            hovertemplate:
+                                                'Day: %{x}<br>Readmission: %{y:.2%}<extra>30 Days</extra>'
                                         },
-                                        yaxis: {
-                                            title: { text: 'Readmission Probability', font: { size: 17 } },
-                                            range: [0, 1],
-                                            showgrid: true,
-                                            zeroline: true,
-                                        },
-                                        annotations: readmissionData.length === 0 ? [{
-                                            xref: 'paper', yref: 'paper',
-                                            x: 0.5, y: 0.5,
-                                            text: 'No data available',
-                                            showarrow: false,
-                                            font: { size: 20 }
-                                        }] : [],
-                                        margin: { t: 70, l: 100, r: 40, b: 80 },
-                                    }}
-                                />
-
-                                {/* Death Probability Chart */}
+                                        {
+                                            x: [60],
+                                            y: [(prediction?.readmission_60_day || 0)],
+                                            type: 'scatter',
+                                            mode: 'markers+text',
+                                            marker: { color: 'green', size: 10 },
+                                            name: '60 Days',
+                                            text: ['Day 60'],
+                                            textposition: 'top center',
+                                            hovertemplate:
+                                                'Day: %{x}<br>Readmission: %{y:.2%}<extra>60 Days</extra>'
+                                        }
+                                        ]
+                                            : []
+                                        }
+                                        layout={{
+                                            title: {
+                                                text: 'Readmission Probability Curve',
+                                                font: { size: 19 },
+                                                x: 0.5,
+                                                xanchor: 'center'
+                                            },
+                                            xaxis: {
+                                                title: { text: 'Time (Days)', font: { size: 17 } },
+                                                showgrid: true,
+                                                zeroline: true,
+                                            },
+                                            yaxis: {
+                                                title: { text: 'Readmission Probability', font: { size: 17 } },
+                                                range: [0, 1],
+                                                showgrid: true,
+                                                zeroline: true,
+                                            },
+                                            annotations: readmissionData.length === 0 ? [{
+                                                xref: 'paper', yref: 'paper',
+                                                x: 0.5, y: 0.5,
+                                                text: 'No data available',
+                                                showarrow: false,
+                                                font: { size: 20 }
+                                            }] : [],
+                                            margin: { t: 70, l: 100, r: 40, b: 80 },
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            </Col>
+                            <Col md ={1}></Col>
+                            {/* Death Probability Chart */}
+                            <Col md={11}>
+                            <div className="chart-container">
                                 <div className="chart">
                                     <Plot
                                         data={deathData.length > 0 ? [{
@@ -537,11 +542,9 @@ const Dashboard = ({ email }) => {
                                         }}
                                     />
                                 </div>
-
-
                             </div>
-
-                        </div>
+                            </Col>
+                        </Row>
                     </div>
                 </>
             )}
