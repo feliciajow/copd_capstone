@@ -8,6 +8,7 @@ const PreviewFile = ({ file, modelName, proceed, prev }) => {
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [size, setSize] = useState('large');
 
   const headers = [
     "Admit/Visit Date/Time",
@@ -32,7 +33,6 @@ const PreviewFile = ({ file, modelName, proceed, prev }) => {
       });
       const result = await response.text();
       if (response.ok) {
-        alert("Model Training Successful!");
         proceed();
       } else {
         alert(result.error);
@@ -160,6 +160,7 @@ const PreviewFile = ({ file, modelName, proceed, prev }) => {
           <br />
           <Button
             className="btns"
+            size={size}
             style={{ width: '20%', margin: '0 8px' }}
             type="default"
             onClick={prev}
@@ -169,6 +170,7 @@ const PreviewFile = ({ file, modelName, proceed, prev }) => {
           {!error && (
             <Button
               className="btns"
+              size={size}
               style={{ width: '20%', margin: '0 8px', backgroundColor: '#29b6f6' }}
               type="primary"
               onClick={handleProceed}

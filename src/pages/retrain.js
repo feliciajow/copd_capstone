@@ -18,6 +18,7 @@ const Retrain = ({ email }) => {
         setCurrent((prev) => prev - 1);
 
     };
+    const [size, setSize] = useState('large');
     
     const uploadModel = (name) => {
         setfileupload(true);

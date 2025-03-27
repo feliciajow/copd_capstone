@@ -12,6 +12,7 @@ const { Option } = Select;
 const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [size, setSize] = useState('large');
   const [uploadAlert, setUploadAlert] = useState(null);
   const [modelName, setModelName] = useState("");
   const [diagnosticInterest, setDiagnosticInterest] = useState("J44");
@@ -182,7 +183,7 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
         <Row>
           <Col md={6}>
             <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block", textAlign: "left" }}>
-              Name Your Model:
+              <h3>Name Your Model:</h3>
             </label>
             <Tooltip
               trigger={['focus']}
@@ -203,10 +204,11 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
         <Row>
           <Col md={6}>
             <label style={{ fontWeight: "bold", marginBottom: "8px", display: "block", textAlign: "left" }}>
-              Select Diagnostic Interest:
+              <h3>Select Diagnostic Interest:</h3>
             </label>
             <Select
               showSearch
+              size={size}
               value={diagnosticInterest}
               onChange={(value) => {
                 const shortCode = value.substring(0, 3); // Extract first 3 letters
@@ -239,6 +241,7 @@ const UploadFile = ({ alert, setFile, fileupload, uploadModel }) => {
 
         <Button
           className="btns"
+          size = {size}
           style={{ width: '20%' }}
           type="primary"
           onClick={async () => {

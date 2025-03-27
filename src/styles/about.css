@@ -158,6 +158,7 @@
     color: #555;
     font-size: 1rem;
     line-height: 1.5;
+    text-align:center;
 }
 
 .graph-explainer-section {
@@ -168,7 +169,7 @@
   
   .graph-title {
     font-size: 2.5rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #083d32;
     margin-bottom: 1rem;
   }

@@ -10,6 +10,7 @@ const Models = ({ email }) => {
     const [searchText, setSearchText] = useState('');
     const [searchedColumn, setSearchedColumn] = useState('');
     const navigate = useNavigate();
+    const [size, setSize] = useState('large');
     const getColumnSearchProps = (dataIndex) => ({
         
     });
@@ -128,14 +129,14 @@ const Models = ({ email }) => {
                         <Col span={15}>
                         </Col>
                         <Col span={2}>
-                            <Button type="default" onClick={fetchModels}>Refresh</Button>
+                            <Button type="default" size={size} onClick={fetchModels}>Refresh</Button>
                         </Col>
                         <Col span={2}>
-                            <Button style={{backgroundColor:"#29b6f6", color:"white"}} onClick={() => navigate('/retrain')}>+ Train New Model</Button>
+                            <Button size={size} style={{backgroundColor:"#29b6f6", color:"white"}} onClick={() => navigate('/retrain')}>+ Train New Model</Button>
                         </Col>
                     </Row>
                     
-                    <Card style={{ background: 'transparent' }}>
+                    <Card style={{ background: 'transparent', border:"transparent" }}>
                         <Table
                             columns={columns}
                             dataSource={fetchModel}

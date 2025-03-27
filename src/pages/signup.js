@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [size, setSize] = useState('large');
   //track alert messages error
   const [alert, setalert] = useState(null)
 
@@ -46,18 +47,19 @@ const Signup = () => {
           <Col span={1}></Col>
           <Col span={13}>
             <Row>
-              <h1>Create An Account</h1>
+              <h1 style={{fontsize:"30px"}}>Create An Account</h1>
             </Row>
             <br />
             <Form
               name="basic"
+              size={size}
               //positioning of input box
               labelCol={{
                 span: 6,
               }}
               //length of input box
               wrapperCol={{
-                span: 18,
+                span: 22,
               }}
               style={{
                 maxWidth: 600,
@@ -137,14 +139,14 @@ const Signup = () => {
               <Form.Item label={null}>
                 <Row>
                   <Col span={24}>
-                    <Button className="register-btns" type="primary" style={{ width: "100%", marginTop: "10px", backgroundColor: "#29b6f6" }} htmlType="submit">
+                    <Button size={size} className="register-btns" type="primary" style={{ width: "100%", marginTop: "10px", backgroundColor: "#29b6f6" }} htmlType="submit">
                       Register
                     </Button>
                   </Col>
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <Button type="default" style={{ width: "100%", marginTop: "10px" }} onClick={() => navigate('/')}>
+                    <Button size={size} type="default" style={{ width: "100%", marginTop: "10px" }} onClick={() => navigate('/')}>
                       Back to Login
                     </Button>
                   </Col>

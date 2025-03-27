@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import * as excel from 'xlsx';
 import { Button } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 
 const ExcelTemplate=() =>{
+    const [size, setSize] = useState('large');
     const downloadExcel = () => {
         //create column headers
         const headers = [
@@ -18,8 +19,8 @@ const ExcelTemplate=() =>{
     }
     return(
         <div className="card" style={{textAlign: 'left', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <p>Download template file:</p>
-            <Button type="default" icon={<DownloadOutlined />} onClick={downloadExcel}>
+            <h3>Download template file:</h3>
+            <Button size={size} type="default" icon={<DownloadOutlined />} onClick={downloadExcel}>
                 COPD Asthma Excel Template
             </Button>
         </div>

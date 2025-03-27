@@ -6,6 +6,7 @@ import Dashboard from './dashboard';
 
 const Login = ({ handleLogin }) => {
   const navigate = useNavigate();
+  const [size, setSize] = useState('large');
   //open modal pop up
   const [isModalOpen, setIsModalOpen] = useState(false);
   //track alert messages error
@@ -90,7 +91,7 @@ const Login = ({ handleLogin }) => {
           <Col span={1}></Col>
           <Col span={13}>
             <Row>
-              <h1>Welcome Back</h1>
+              <h1 style={{ fontSize: "30px" }}>Welcome Back</h1>
             </Row>
             <Row>
               <p style={{ fontSize: "17px" }}>Enter your credentials to continue.</p>
@@ -98,13 +99,14 @@ const Login = ({ handleLogin }) => {
             <br />
             <Form
               name="basic"
+              size={size}
               //positioning of input box
               labelCol={{
                 span: 4,
               }}
               //length of input box
               wrapperCol={{
-                span: 18,
+                span: 22,
               }}
               style={{
                 maxWidth: 600,
@@ -138,6 +140,7 @@ const Login = ({ handleLogin }) => {
               <Form.Item style={{ textAlign: "left" }}
                 label="Password"
                 labelAlign="left"
+                size={size}
                 name="password"
                 rules={[
                   {
@@ -169,14 +172,14 @@ const Login = ({ handleLogin }) => {
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <Button className="login-btns" type="primary" style={{ width: "100%", marginTop: "10px", backgroundColor: "#29b6f6" }} htmlType="submit">
+                    <Button size={size} className="login-btns" type="primary" style={{ width: "100%", marginTop: "10px", backgroundColor: "#29b6f6" }} htmlType="submit">
                       Login
                     </Button>
                   </Col>
                 </Row>
                 <Row>
                   <Col span={24}>
-                    <p style={{ fontSize: "13px" }}>Don't have an account? <a href='#' onClick={() => navigate('/signup')}> Register</a></p>
+                    <p style={{ fontSize: "15px" }}>Don't have an account? <a href='#' onClick={() => navigate('/signup')}> Register</a></p>
                   </Col>
                 </Row>
               </Form.Item>
