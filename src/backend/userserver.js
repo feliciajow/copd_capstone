@@ -4,6 +4,31 @@ const express = require("express");
 const app = express();
 const port = 5000;
 const cors = require("cors");
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'COPD Capstone API',
+      version: '1.0.0',
+      description: 'API documentation for the COPD Capstone project',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000/',
+      },
+    ],
+  },
+  apis: [path.join(__dirname, 'userserver.js')],
+};
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -25,6 +50,38 @@ app.get("/", (req, res) => {
   res.send("Received!");
 }); 
 
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Creates a new user account with an email and password.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: New user's email address.
+ *               password:
+ *                 type: string
+ *                 description: New user's password.
+ *               confirmpassword:
+ *                 type: string
+ *                 description: Confirm user's password.
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *       400:
+ *         description: Email and password are required.
+ *       409:
+ *         description: An account with this email already exists.
+ *       500:
+ *         description: An error occurred while registering the user.
+ */
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -45,6 +102,35 @@ app.post('/register', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /loggedin:
+ *   post:
+ *     summary: Login a existing user
+ *     description: Creates a existing user account with an email and password.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: New user's email address.
+ *               password:
+ *                 type: string
+ *                 description: New user's password.
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *       400:
+ *         description: Email and password are required.
+ *       409:
+ *         description: An account with this email already exists.
+ *       500:
+ *         description: An error occurred while registering the user.
+ */
 app.post('/loggedin', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -95,6 +181,29 @@ app.post("/fileUpload", (req, res) => {
   res.sendStatus(200);
 });
 
+/**
+ * @swagger
+ * /model:
+ *   get:
+ *     summary: Retrieve a list of all trained models
+ *     description: Fetches a list of trained models from all users on BreathAI.
+ *     parameters:
+ *       - in: header
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The user's email address.
+ *     responses:
+ *       200:
+ *         description: List of trained models.
+ *       400:
+ *         description: Email is required.
+ *       404:
+ *         description: No models trained.
+ *       500:
+ *         description: An error occurred while retrieving models.
+ */
 app.get("/model", async (req, res) => {
   const { email } = req.headers; //retrieve email from header in frontend
   if (!email) {

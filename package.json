@@ -25,6 +25,8 @@
     "react-scripts": "5.0.1",
     "react-spreadsheet-import": "^4.7.1",
     "styled-components": "^6.1.15",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },

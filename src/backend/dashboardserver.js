@@ -6,10 +6,35 @@ const { PythonShell } = require("python-shell");
 const fs = require('fs').promises;
 const path = require('path');
 const axios = require("axios");
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'COPD Capstone API',
+      version: '1.0.0',
+      description: 'API documentation for the COPD Capstone project',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5001/',
+      },
+    ],
+  },
+  apis: [path.join(__dirname, 'dashboardserver.js')],
+};
+console.log("Current directory:", __dirname);
+console.log("Full path:", path.join(__dirname, 'dashboardserver.js'));
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Connect database
 const pool = new Pool({
@@ -36,6 +61,16 @@ async function getDiagnosticCodes() {
     }
 }
 
+//api documentation
+/**
+ * @swagger
+ * /diagnostic-codes:
+ *   get:
+ *     summary: Fetch diagnostic codes from PostgreSQL database
+ *     responses:
+ *       200:
+ *         description: List of diagnostic codes
+ */
 // Fetch diagnostic codes from database
 app.get("/diagnostic-codes", async (req, res) => {
     try {
@@ -46,66 +81,60 @@ app.get("/diagnostic-codes", async (req, res) => {
     }
 });
 
-// // Retrieve/Get model
-// async function getModel(modelId) {
-//     try {
-//         const result = await pool.query(
-//             "SELECT modelid, model_data FROM models WHERE modelid = $1",
-//             [modelId]
-//         );
-
-//         if (result.rows.length > 0) {
-//             return {
-//                 modelid: result.rows[0].modelid,
-//                 model_data: result.rows[0].model_data,
-//             };
-//         } else {
-//             return null;
-//         }
-//     } catch (error) {
-//         console.error("Error fetching model:", error);
-//         return null;
-//     }
-// }
-
-// // Function to Check and Retrieve Model from Cache or Database
-// async function getModelPath(modelId) {
-//     try {
-//         const modelCachePath = path.join(tempDir, `model_${modelId}.pkl`);
-
-//         // If model already exists in cache, return it
-//         try {
-//             await fs.access(modelCachePath);
-//             console.log(`Using cached model: ${modelCachePath}`);
-//             return modelCachePath;
-//         } catch (error) {
-//             console.log(`Model ${modelId} not found in cache. Fetching from database...`);
-//         }
-
-//         // Fetch model from database using getModel function
-//         const modelData = await getModel(modelId);
-//         if (!modelData) {
-//             throw new Error(`Model ID ${modelId} not found in database`);
-//         }
-
-//         // Save new model file
-//         await fs.writeFile(modelCachePath, modelData.model_data);
-//         console.log(`Model ${modelId} saved to cache: ${modelCachePath}`);
-
-//         return modelCachePath;
-//     } catch (error) {
-//         console.error("Error retrieving model:", error);
-//         throw error;
-//     }
-// }
-
+// api documentation
+/**
+ * @swagger
+ * /predict:
+ *   post:
+ *     summary: Predict Readmission and Survival Probabilities
+ *     description: This endpoint predicts readmission and survival probabilities based on patient data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               modelid:
+ *                 type: integer
+ *                 description: ID of the model to use for prediction
+ *               gender:
+ *                 type: string
+ *                 description: Gender of the patient (male/female)
+ *               age:
+ *                 type: integer
+ *                 description: Age of the patient
+ *               readmissions:
+ *                 type: integer
+ *                 description: Number of times the patient was admitted
+ *               diagnosticCodes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of diagnostic codes
+ *     responses:
+ *       200:
+ *         description: Prediction results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 readmission_30_day:
+ *                   type: number
+ *                   description: Probability of readmission within 30 days
+ *                 readmission_60_day:
+ *                   type: number
+ *                   description: Probability of readmission within 60 days
+ *       400:
+ *         description: Bad Request
+ *       500:
+ *         description: Internal Server Error
+ */
 // predict
 app.post("/predict", async (req, res) => {
     let {modelid, gender, age, readmissions, diagnosticCodes } = req.body;
 
-    // if (!modelid || gender === null || age === null || readmissions === null || diagnosticCodes.length === 0) {
-    //     return res.status(400).json({ error: "All input fields are required" });
-    // }
     try {
         // if no model ID provided because use guest, use latest model
         if (!modelid) {

@@ -15,13 +15,13 @@ import zipfile
 from sksurv.util import Surv
 import gzip
 
+
 app = Flask(__name__)
 CORS(app, resources={
     r"/fileUpload": {"origins": "http://localhost:3000"},
     r"/train": {"origins": "http://localhost:3000"},
     r"/predict": {"origins": "http://localhost:3000"}
 })
-
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

@@ -152,7 +152,7 @@
     /* Adjust chart sizes */
     .chart {
       width: 100%; /* Match width of the form */
-      max-width: 900px; /* Prevent excessive stretching */
+      max-width: 800px; /* Prevent excessive stretching */
       height: auto; /* Adjust height */
       border: 1px solid transparent;
       border-radius: 10px;
