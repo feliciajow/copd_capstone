@@ -23,7 +23,7 @@ const Models = ({ email }) => {
 
     const fetchModels = () => {
         setLoading(true);
-        fetch('http://localhost:5000/model', {
+        fetch('http://localhost:5000/api/users/model', {
             method: 'GET',
             headers: { "Content-Type": "application/json", "Email": email },
         })

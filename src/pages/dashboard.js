@@ -37,7 +37,7 @@ const Dashboard = ({ email }) => {
     // Fetch trained models from backend
     const fetchModels = () => {
         setLoading(true);
-        fetch('http://localhost:5000/model', {
+        fetch('http://localhost:5000/api/users/model', {
             method: 'GET',
             headers: { "Content-Type": "application/json", "Email": email || "" },
         })
@@ -91,7 +91,7 @@ const Dashboard = ({ email }) => {
     useEffect(() => {
         async function fetchDiagnosticCodes() {
             try {
-                const response = await axios.get("http://localhost:5001/diagnostic-codes");
+                const response = await axios.get("http://localhost:5000/api/dashboard/diagnostic-codes");
                 console.log("Fetched Diagnostic Codes:", response.data.codes);
                 setDiagnosticCodes(response.data.codes);
             } catch (error) {
@@ -139,7 +139,7 @@ const Dashboard = ({ email }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post("http://localhost:5001/predict", {
+            const response = await axios.post("http://localhost:5000/api/dashboard/predict", {
                 modelid: Number(selectedModel),
                 gender: genderMapped,
                 age: parseInt(age),
@@ -163,11 +163,6 @@ const Dashboard = ({ email }) => {
             setLoading(false);
         }
     };
-
-    // const deathData = prediction?.survival_curve?.time?.map((day, index) => ({
-    //     days: day,
-    //     Survival: prediction.survival_curve.probability[index]
-    // })) || [];
 
     const loadICDCodesFromFile = async () => {
         try {
@@ -271,7 +266,7 @@ const Dashboard = ({ email }) => {
             {loading ? (
                 <div className="loading">
                     <Spin size="large" />
-                    <h2>Please wait patiently...</h2>
+                    <h2>Please wait patiently and do not leave the page...</h2>
                 </div>
             ) : (
                 <>

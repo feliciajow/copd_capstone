@@ -10,7 +10,7 @@ const Signup = () => {
   const [alert, setalert] = useState(null)
 
   const onFinish = (values) => {
-    fetch('http://localhost:5000/register', {
+    fetch('http://localhost:5000/api/users/register', {
       method: 'POST',
       headers: { "Content-Type": "application/json" }, //telling server the type of content that we are sending with this req
       body: JSON.stringify({ email: values.email, password: values.password }), //actual content email and password

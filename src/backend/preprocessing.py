@@ -14,7 +14,7 @@ import psycopg2
 import zipfile
 from sksurv.util import Surv
 import gzip
-
+from flasgger import Swagger
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -22,12 +22,13 @@ CORS(app, resources={
     r"/train": {"origins": "http://localhost:3000"},
     r"/predict": {"origins": "http://localhost:3000"}
 })
+swagger = Swagger(app)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 OUTPUT_FOLDER = "output"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-TEMP_DIR = "temp"
+TEMP_DIR = "models"
 
 
 DB_CONFIG = {
@@ -41,7 +42,26 @@ DB_CONFIG = {
 
 @app.route("/fileUpload", methods=["POST"])
 def death_upload_file():
-    
+    """
+    Upload an excel file for preprocessing
+    ---
+    parameters:
+      - name: file
+        in: formData
+        type: file
+        required: true
+        description: The Excel file containing patient data.
+      - name: diagnostic_interest
+        in: formData
+        type: string
+        required: false
+        description: The diagnostic code of interest (e.g., J44 for COPD).
+    responses:
+      200:
+        description: File uploaded and processed successfully.
+      400:
+        description: No file part in the request or no file selected.
+    """
     if "file" not in request.files or request.files["file"].filename == "":
         return jsonify({"message": "No file part in request"}), 400
 
@@ -368,6 +388,21 @@ def death_upload_file():
 
 @app.route("/train", methods=["POST"])
 def train():    
+    """
+    Train a machine learning model
+    ---
+    parameters:
+      - name: modelName
+        in: body
+        type: string
+        required: true
+        description: The name of the model to be trained.
+    responses:
+      200:
+        description: Model training successful.
+      500:
+        description: An error occurred during training.
+    """
     data = request.get_json()
     model_name = data.get("modelName", "default_model")
     print(f"Model Name: {model_name}")
@@ -482,7 +517,60 @@ def train():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-
+    """
+    Predict readmission and survival probabilities
+    ---
+    parameters:
+      - name: modelid
+        in: body
+        type: integer
+        required: true
+        description: The ID of the model to use for prediction.
+      - name: gender
+        in: body
+        type: integer
+        required: true
+        description: Gender of the patient (1 for male, 0 for female).
+      - name: age
+        in: body
+        type: integer
+        required: true
+        description: Age of the patient.
+      - name: readmissions
+        in: body
+        type: integer
+        required: true
+        description: Number of times the patient was admitted.
+      - name: diagnosticCodes
+        in: body
+        type: array
+        items:
+          type: string
+        required: true
+        description: List of diagnostic codes.
+    responses:
+      200:
+        description: Prediction results.
+        schema:
+          type: object
+          properties:
+            death_6_month:
+              type: number
+              description: Probability of death within 6 months.
+            death_12_month:
+              type: number
+              description: Probability of death within 12 months.
+            readmission_30_day:
+              type: number
+              description: Probability of readmission within 30 days.
+            readmission_60_day:
+              type: number
+              description: Probability of readmission within 60 days.
+      400:
+        description: Missing required fields.
+      500:
+        description: An error occurred during prediction.
+    """
     # Connect to database  
     conn = psycopg2.connect(**DB_CONFIG) 
     cur = conn.cursor()

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button, Row, Col, Form, Input, Flex, Modal, Result, Alert } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import '../styles/style.css';
-import Dashboard from './dashboard';
 
 const Login = ({ handleLogin }) => {
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ const Login = ({ handleLogin }) => {
   }
   //submit buttons for login
   const onFinish = (values) => {
-    fetch('http://localhost:5000/loggedin', {
+    fetch('http://localhost:5000/api/users/loggedin', {
       method: 'POST',
       headers: { "Content-Type": "application/json" }, //telling server the type of content that we are sending with this req
       body: JSON.stringify({ email: values.email, password: values.password }), //actual content email and password
@@ -53,30 +52,34 @@ const Login = ({ handleLogin }) => {
 
   //submit buttons for forget pwd
   const onEmailSubmit = (values) => {
-    fetch('http://localhost:5000/forgetpwd', {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" }, //telling server the type of content that we are sending with this req
-      body: JSON.stringify({ email: values.email }), //actual content email and password
+    fetch("http://localhost:5000/api/users/forgotpwd", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: values.email }),
     })
       .then((response) => {
         if (!response.ok) {
           return response.json().then((data) => {
-            throw new Error(data.error || 'No email registered.');
+            throw new Error(data.error || "Failed to send reset email.");
           });
         }
         return response.json();
       })
-      .then(() => {
-        console.log('Success:', values);
+      .then((data) => {
+        console.log("Reset Token:", data.resetToken); // Log the token for testing
+        // Redirect to reset password page with the token
+        navigate(`/resetpwd?token=${data.resetToken}`);
       })
-      .catch((error) => { //handle errors from fetch response
+      .catch((error) => {
         setalert(
           <Alert
+            message="Error"
             description={error.message}
             type="error"
             showIcon
-          />)
-      })
+          />
+        );
+      });
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -213,7 +216,7 @@ const Login = ({ handleLogin }) => {
               </Form.Item>
               <Form.Item>
                 <Button className="forgotpwd-btns" type="default" htmlType="submit">
-                  Send Reset Link
+                  Reset Link
                 </Button>
               </Form.Item>
             </Form>

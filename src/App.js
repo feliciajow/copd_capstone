@@ -7,6 +7,7 @@ import Models from './pages/Models';
 import Retrain from './pages/retrain';
 import Login from './pages/login';
 import Signup from './pages/signup';
+import ResetPwd from './pages/resetpwd';
 
 function Header({email, handleLogin}) {
   const navigate = useNavigate();
@@ -62,6 +63,7 @@ function App() {
           <Route path="/retrain" element={<Retrain email={email}/>} />
           <Route path="/models" element={<Models email={email}/>} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/resetpwd" element={<ResetPwd />} />
         </Routes>
       </div>
     </Router>
