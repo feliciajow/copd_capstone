@@ -86,7 +86,7 @@ const Signup = () => {
                 ]}
                 hasFeedback
               >
-                <Input placeholder='Enter your email' />
+                <Input placeholder='Enter your email' name="email" />
               </Form.Item>
 
               <Form.Item style={{ textAlign: "left" }}
@@ -106,7 +106,7 @@ const Signup = () => {
                 ]}
                 hasFeedback
               >
-                <Input.Password placeholder='Enter your password' />
+                <Input.Password placeholder='Enter your password' name="password"/>
               </Form.Item>
 
               <Form.Item style={{ textAlign: "left" }}
@@ -133,7 +133,7 @@ const Signup = () => {
                   }),
                 ]}
               >
-                <Input.Password placeholder='Enter your confirm password' />
+                <Input.Password placeholder='Enter your confirm password' name="confirmpassword" />
               </Form.Item>
 
               <Form.Item label={null}>
