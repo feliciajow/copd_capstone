@@ -13,6 +13,7 @@ import icd10Excel from "../data/icd_10.xlsx";
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
+    const [size, setSize] = useState('large');
     const [selectedModel, setSelectedModel] = useState('');
     const [gender, setGender] = useState('');
     const [age, setAge] = useState('');
@@ -109,23 +110,7 @@ const Dashboard = ({ email }) => {
         }
     };
 
-
-    //To handle multiple selection of codes
-    // const handleSelectChange = (e) => {
-    //     const selectedValue = e.target.value;
-    //     if (selectedValue && !selectedCodes.includes(selectedValue)) {
-    //         setSelectedCodes([...selectedCodes, selectedValue]); // Add code if not already selected
-    //     }
-    // };
-
-    // // Handle removal of selected codes
-    // const removeCode = (code) => {
-    //     setSelectedCodes(selected
-    // 
-    // Codes.filter(c => c !== code));
-    // };
-
-      // Handle checkbox selection in modal
+    // Handle checkbox selection in modal
     const handleCheckboxChange = (checkedValues) => {
         setCheckedCodes(checkedValues);
     };
@@ -192,64 +177,114 @@ const Dashboard = ({ email }) => {
         try {
             const response = await fetch(icd10Excel);
             const blob = await response.blob();
-
+    
             const reader = new FileReader();
             reader.readAsBinaryString(blob);
-
+    
             reader.onload = (e) => {
                 const binaryStr = e.target.result;
                 const workbook = XLSX.read(binaryStr, { type: "binary" });
-
+    
                 if (workbook.SheetNames.length === 0) {
                     throw new Error("No sheets found in the Excel file.");
                 }
-
+    
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
-
+    
                 if (!worksheet) {
                     throw new Error("Sheet is empty or invalid.");
                 }
-
+    
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
+    
                 if (jsonData.length === 0) {
                     throw new Error("Excel file has no data.");
                 }
-
-                // Extract ICD-10 codes
-                const groupedCodes = jsonData.reduce((acc, row) => {
-                    if (row["ICD-10 Combined"] && row["domain"]) {
-                        const [code, ...descParts] = row["ICD-10 Combined"].split(": ");
-                        const domain = row["domain"];
-                        const description = descParts.join(": ") || "No description available";
     
-                        if (!acc[domain]) acc[domain] = [];
-                        acc[domain].push({ code, description });
-                    }
-                    return acc;
-                }, {});
+                // Handle the processed jsonData here
+                console.log(jsonData); // Example of logging the data
     
-                // Convert grouped codes into a format for setting the options
-                const groupedOptions = Object.keys(groupedCodes).map(domain => ({
-                    domain,
-                    codes: groupedCodes[domain],
-                }));
+            };
     
-                // Set grouped options to the state
-                setDiagnosticOptions(groupedOptions)
-
-                message.success("ICD-10 codes loaded from Excel file!");
+            reader.onerror = (error) => {
+                throw new Error("FileReader error: " + error.message);
             };
         } catch (error) {
             console.error("Error loading Excel file:", error);
             message.error("Error loading ICD-10 codes: " + error.message);
         }
     };
+    
+
+    // Load chapter mapping from Excel
+    async function loadChapterMappingFromExcel() {
+        try {
+        const response = await fetch(icd10Excel);
+        const blob = await response.blob();
+        const reader = new FileReader();
+    
+        return new Promise((resolve, reject) => {
+            reader.onload = (e) => {
+            const binaryStr = e.target.result;
+            const workbook = XLSX.read(binaryStr, { type: "binary" });
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+            const mapping = {};
+            jsonData.forEach(row => {
+                if (row["ICD-10 Combined"] && row["domain"]) {
+                    //split the code and description in icd-10 combined based on the ":"
+                    //then trim extra spaces
+                    const [code, description] = row["ICD-10 Combined"].split(":").map(s => s.trim());
+                    //store code as key
+                    mapping[code] = { domain: row["domain"].trim(), description };
+                }
+            });
+    
+            resolve(mapping);
+            };
+    
+            reader.onerror = reject;
+            reader.readAsBinaryString(blob);
+        });
+        } catch (error) {
+        console.error("Failed to load chapter mapping from Excel:", error);
+        return {};
+        }
+    }
+
+    // Load and group codes based on fetched diagnosticCodes
+    useEffect(() => {
+        async function loadAndGroupCodes() {
+        const chapterMapping = await loadChapterMappingFromExcel();
+        const groupedCodes = diagnosticCodes.reduce((acc, code) => {
+            //this return the description and domain of the code
+            const title = chapterMapping[code] || "Other";
+            if (!acc[title.domain]) acc[title.domain] = [];
+            acc[title.domain].push({ code, description: title.description });
+            return acc;
+        }, {});
+        console.log("Grouped Codes", groupedCodes);
+        const groupedOptions = Object.entries(groupedCodes).map(([domain, codes]) => ({
+            domain,
+            codes
+        }));
+        console.log('Grouped Options', groupedOptions);
+        setDiagnosticOptions(groupedOptions);
+        message.success("ICD-10 codes loaded from Excel file!");
+        }
+    
+        if (diagnosticCodes.length > 0) {
+        loadAndGroupCodes();
+        }
+    }, [diagnosticCodes]);
 
     const getDiagnosticDescription = (code) => {
+        console.log("Diagnostic Options", code);
         // Compare diagnostic code with the diagnostic code in the excel and return its description
         const codeOption = diagnosticOptions.find((option) => option.codes.some(c => c.code === code));
+        console.log("Found Code Option:", codeOption);
         return codeOption ? codeOption.codes.find(c => c.code === code).description : 'Description not available';
     };
 
@@ -399,42 +434,42 @@ const Dashboard = ({ email }) => {
                             {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
 
                             <h2>Diagnostic Codes</h2>
-                                <Button onClick={openModal} type="primary">Select Diagnostic Codes</Button>
+                                <button className="predict-btn" style={{ backgroundColor:"#29b6f6", color:"white"}}onClick={openModal} type="primary">Select Diagnostic Codes</button>
 
                                 {/* Modal for Diagnostic Codes */}
                                 <Modal
-                                title="Select Diagnostic Codes"
-                                visible={visible}
-                                onOk={handleOk}
-                                onCancel={handleCancel}
-                                width={2000}
-                                bodyStyle={{ maxHeight: '900px', overflowY: 'auto' }}
-                                footer={[
-                                    <Button key="back" onClick={handleCancel}>Cancel</Button>,
-                                    <Button key="submit" type="primary" onClick={handleOk}>OK</Button>
-                                ]}
-                            >
-                                <Checkbox.Group style={{ width: '100%' }} value={checkedCodes} onChange={handleCheckboxChange}>
-                                    <Row gutter={[16, 16]}>
-                                        {diagnosticOptions.length > 0 ? (
-                                            diagnosticOptions.map((group, index) => (
-                                                <Col span={12} key={index}>
-                                                    <h3>{group.domain}</h3> {/* Display the domain name */}
-                                                    <div className="checkbox-group">
-                                                        {group.codes.map((code) => (
-                                                            <Checkbox key={code.code} value={code.code}>
-                                                                {code.code} - {code.description || 'No description available'}
-                                                            </Checkbox>
-                                                        ))}
-                                                    </div>
-                                                </Col>
-                                            ))
-                                        ) : (
-                                            <Col span={24}>No diagnostic codes available</Col>
-                                        )}
-                                    </Row>
-                                </Checkbox.Group>
-                            </Modal>
+                                    title="Select Diagnostic Codes"
+                                    visible={visible}
+                                    onOk={handleOk}
+                                    onCancel={handleCancel}
+                                    width={2000}
+                                    bodyStyle={{ maxHeight: '900px', overflowY: 'auto' }}
+                                    footer={[
+                                        <Button key="back" onClick={handleCancel}>Cancel</Button>,
+                                        <Button key="submit" type="primary" onClick={handleOk}>OK</Button>
+                                    ]}
+                                >
+                                    <Checkbox.Group style={{ width: '100%' }} value={checkedCodes} onChange={handleCheckboxChange}>
+                                        <Row gutter={[16, 16]}>
+                                            {diagnosticOptions.length > 0 ? (
+                                                diagnosticOptions.map((group, index) => (
+                                                    <Col span={12} key={index}>
+                                                        <h3>{group.domain}</h3> {/* Display the domain name */}
+                                                        <div className="checkbox-group">
+                                                            {group.codes.map((code) => (
+                                                                <Checkbox key={code.code} value={code.code}>
+                                                                    {code.code} - {getDiagnosticDescription(code.code)} {/* Fetch description */}
+                                                                </Checkbox>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                ))
+                                            ) : (
+                                                <Col span={24}>No diagnostic codes available</Col>
+                                            )}
+                                        </Row>
+                                    </Checkbox.Group>
+                                </Modal>
 
                             {errors.diagnosticCodes && <p className="error-message">{errors.diagnosticCodes}</p>}
 
