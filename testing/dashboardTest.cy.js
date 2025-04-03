@@ -36,6 +36,7 @@ describe('Viewing of Dashboard Page', () => {
   });
 
   it('Should be able to select the diagnostic codes from dropdown', () => {
+    cy.contains('Diagnostic Codes').should('exist');
     cy.get('select.input-field').last().select(1);
     cy.get('select.input-field').last().select(2);
   });
@@ -49,42 +50,4 @@ describe('Viewing of Dashboard Page', () => {
     //if results not shown it will show N/A instead of %
     cy.get('.results-group').should('contain', '%');
   });
-
-  
-  // it('Rendering of Upload File Page', () => {
-  //   cy.get('.ant-steps-item').first().should('have.class', 'ant-steps-item-active');
-  //   cy.get('h1').should('contain', 'Upload File');
-  //   //check if predict button exist
-  //   cy.get('.btns').should('exist');
-  // });
-
-  // it('Rendering of download excel file', () => {
-  //   cy.mount(<ExcelTemplate/>);
-  //   cy.get('p').should('contain', 'Download template file');
-  //   cy.get('button').contains('COPD Asthma Excel Template').should('exist');
-  // })
-
-  // it('Download excel file', () => {
-  //   cy.mount(<ExcelTemplate/>);
-  //   cy.get('button').contains('COPD Asthma Excel Template').should('exist');
-  //   cy.get('button').contains('COPD Asthma Excel Template').click();
-  // })
-
-  // it('Uploading of a file of a wrong type, png', () => {
-  //   cy.get('input[type="file"]').attachFile('lakitus-cloud.png');
-  //   cy.get('.ant-alert').should('contain', 'is not an xlsx, xls, or csv file');
-  // })
-
-  // it('Uploading of a xlsx or csv file will disable the upload button', () => {
-  //   cy.get('input[type="file"]').attachFile('visits 270723 deident.xlsx');
-  //   cy.get('.btns').should('not.be.disabled');
-  // })
-
-  // it('Able to preview file contents after uploading a file', () => {
-  //   cy.get('input[type="file"]').attachFile('visits 270723 deident.xlsx');
-  //   cy.get('.btns').should('not.be.disabled');
-  //   cy.get('.btns').click();
-  //   //correct position of step tracking using eq(1) means second step is active
-  //   cy.get('.ant-steps-item').eq(1).should('have.class', 'ant-steps-item-active');
-  //   cy.contains('button', 'Back').click();
-  })
+})

@@ -137,7 +137,7 @@ const Login = ({ handleLogin }) => {
                 ]}
                 hasFeedback
               >
-                <Input placeholder='Enter your email' />
+                <Input placeholder='Enter your email' name="email"/>
               </Form.Item>
 
               <Form.Item style={{ textAlign: "left" }}
@@ -158,7 +158,7 @@ const Login = ({ handleLogin }) => {
                 ]}
                 hasFeedback
               >
-                <Input.Password placeholder='Enter your password' />
+                <Input.Password placeholder='Enter your password' name="password"/>
               </Form.Item>
 
               <Form.Item label={null}>
