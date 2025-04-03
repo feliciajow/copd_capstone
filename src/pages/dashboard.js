@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, message, Row, Col } from 'antd';
+import { Tooltip, message, Row, Col, Modal, Button, Checkbox } from 'antd';
 import axios from "axios";
 import '../styles/dashboard.css';
 import '../styles/style.css';
@@ -8,7 +8,8 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Spin, Alert } from 'antd';
 import Plot from 'react-plotly.js';
 import * as XLSX from "xlsx";
-import icd10Excel from "../data/icd10_code.xlsx";
+import icd10Excel from "../data/icd_10.xlsx";
+
 
 const Dashboard = ({ email }) => {
     const [models, setModels] = useState([]);
@@ -22,11 +23,10 @@ const Dashboard = ({ email }) => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [alertMessage, setAlertMessage] = useState(null);
-    const [diagnosticOptions, setDiagnosticOptions] = useState([
-        { code: "J44", description: "COPD" },
-        { code: "I10", description: "Hypertension" },
-        { code: "E11", description: "Diabetes Mellitus" }
-    ]);
+    const [diagnosticOptions, setDiagnosticOptions] = useState([]);
+    const [visible, setVisible] = useState(false); // State to manage the visibility of the modal
+    const [checkedCodes, setCheckedCodes] = useState(selectedCodes); // Local state for checked codes
+
 
     useEffect(() => {
         loadICDCodesFromFile();
@@ -111,16 +111,40 @@ const Dashboard = ({ email }) => {
 
 
     //To handle multiple selection of codes
-    const handleSelectChange = (e) => {
-        const selectedValue = e.target.value;
-        if (selectedValue && !selectedCodes.includes(selectedValue)) {
-            setSelectedCodes([...selectedCodes, selectedValue]); // Add code if not already selected
-        }
+    // const handleSelectChange = (e) => {
+    //     const selectedValue = e.target.value;
+    //     if (selectedValue && !selectedCodes.includes(selectedValue)) {
+    //         setSelectedCodes([...selectedCodes, selectedValue]); // Add code if not already selected
+    //     }
+    // };
+
+    // // Handle removal of selected codes
+    // const removeCode = (code) => {
+    //     setSelectedCodes(selected
+    // 
+    // Codes.filter(c => c !== code));
+    // };
+
+      // Handle checkbox selection in modal
+    const handleCheckboxChange = (checkedValues) => {
+        setCheckedCodes(checkedValues);
     };
 
-    // Handle removal of selected codes
-    const removeCode = (code) => {
-        setSelectedCodes(selectedCodes.filter(c => c !== code));
+    // Open modal for diagnostic code selection
+    const openModal = () => {
+        setVisible(true);
+    };
+
+    // Save selected codes from the modal
+    const handleOk = () => {
+        setSelectedCodes(checkedCodes); // Save the selected codes to state
+        setVisible(false); // Close the modal
+    };
+
+    // Handle modal cancellation
+    const handleCancel = () => {
+        setCheckedCodes(selectedCodes); // Reset to previously selected codes
+        setVisible(false); // Close the modal
     };
 
     // Handle form submission
@@ -194,20 +218,26 @@ const Dashboard = ({ email }) => {
                 }
 
                 // Extract ICD-10 codes
-                const extractedCodes = jsonData.map(row => {
-                    if (row["ICD-10 Combined"]) {
+                const groupedCodes = jsonData.reduce((acc, row) => {
+                    if (row["ICD-10 Combined"] && row["domain"]) {
                         const [code, ...descParts] = row["ICD-10 Combined"].split(": ");
-                        return { code, description: descParts.join(": ") || "No description available" };
+                        const domain = row["domain"];
+                        const description = descParts.join(": ") || "No description available";
+    
+                        if (!acc[domain]) acc[domain] = [];
+                        acc[domain].push({ code, description });
                     }
-                    return null;
-                }).filter(Boolean);
-
-                setDiagnosticOptions((prevOptions) => {
-                    const newOptions = [...prevOptions, ...extractedCodes].filter((item, index, self) =>
-                        index === self.findIndex((t) => t.code === item.code)
-                    );
-                    return newOptions;
-                });
+                    return acc;
+                }, {});
+    
+                // Convert grouped codes into a format for setting the options
+                const groupedOptions = Object.keys(groupedCodes).map(domain => ({
+                    domain,
+                    codes: groupedCodes[domain],
+                }));
+    
+                // Set grouped options to the state
+                setDiagnosticOptions(groupedOptions)
 
                 message.success("ICD-10 codes loaded from Excel file!");
             };
@@ -218,9 +248,9 @@ const Dashboard = ({ email }) => {
     };
 
     const getDiagnosticDescription = (code) => {
-        // compare diagnostic code with the diagnostic code in the excel return its description
-        const codeOption = diagnosticOptions.find((option) => option.code === code);
-        return codeOption ? codeOption.description : 'Description not available';
+        // Compare diagnostic code with the diagnostic code in the excel and return its description
+        const codeOption = diagnosticOptions.find((option) => option.codes.some(c => c.code === code));
+        return codeOption ? codeOption.codes.find(c => c.code === code).description : 'Description not available';
     };
 
     const generateDeathCurve = () => {
@@ -369,25 +399,52 @@ const Dashboard = ({ email }) => {
                             {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
 
                             <h2>Diagnostic Codes</h2>
-                            <select
-                                className="input-field"
-                                onChange={handleSelectChange}
-                                showSearch
-                                value="">
-                                <option value="">Choose codes</option>
-                                {diagnosticCodes.map((code) => (
-                                    <option key={code} value={code}>{code} - {getDiagnosticDescription(code)}</option>
-                                ))}
-                            </select>
+                                <Button onClick={openModal} type="primary">Select Diagnostic Codes</Button>
+
+                                {/* Modal for Diagnostic Codes */}
+                                <Modal
+                                title="Select Diagnostic Codes"
+                                visible={visible}
+                                onOk={handleOk}
+                                onCancel={handleCancel}
+                                width={2000}
+                                bodyStyle={{ maxHeight: '900px', overflowY: 'auto' }}
+                                footer={[
+                                    <Button key="back" onClick={handleCancel}>Cancel</Button>,
+                                    <Button key="submit" type="primary" onClick={handleOk}>OK</Button>
+                                ]}
+                            >
+                                <Checkbox.Group style={{ width: '100%' }} value={checkedCodes} onChange={handleCheckboxChange}>
+                                    <Row gutter={[16, 16]}>
+                                        {diagnosticOptions.length > 0 ? (
+                                            diagnosticOptions.map((group, index) => (
+                                                <Col span={12} key={index}>
+                                                    <h3>{group.domain}</h3> {/* Display the domain name */}
+                                                    <div className="checkbox-group">
+                                                        {group.codes.map((code) => (
+                                                            <Checkbox key={code.code} value={code.code}>
+                                                                {code.code} - {code.description || 'No description available'}
+                                                            </Checkbox>
+                                                        ))}
+                                                    </div>
+                                                </Col>
+                                            ))
+                                        ) : (
+                                            <Col span={24}>No diagnostic codes available</Col>
+                                        )}
+                                    </Row>
+                                </Checkbox.Group>
+                            </Modal>
+
                             {errors.diagnosticCodes && <p className="error-message">{errors.diagnosticCodes}</p>}
 
+                            {/* Display selected diagnostic codes */}
                             <div className="selected-codes">
-                                {selectedCodes.map((code) => (
-                                    <span key={code} className="selected-code">
-                                        {code} - {getDiagnosticDescription(code)}
-                                        <button onClick={() => removeCode(code)}>X</button>
-                                    </span>
-                                ))}
+                            {selectedCodes.map((code) => (
+                                <span key={code} className="selected-code">
+                                {code} - {getDiagnosticDescription(code)}
+                                </span>
+                            ))}
                             </div>
                             <button className="predict-btn" onClick={handlePredict} >Predict</button>
                         </div>
