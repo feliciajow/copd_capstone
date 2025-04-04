@@ -32,7 +32,7 @@ TEMP_DIR = "models"
 
 
 DB_CONFIG = {
-    "database": "postgres",
+    "database": "cghdb",
     "user": "postgres",
     "password": "cghrespi",
     "host": "localhost",

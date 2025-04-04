@@ -5,9 +5,10 @@ const dashboardController = require("../controllers/dashboardController");
 // Fetch diagnostic codes
 /**
  * @swagger
- * /diagnostic-codes:
+ * /api/dashboard/diagnostic-codes:
  *   get:
  *     summary: Fetch diagnostic codes from PostgreSQL database
+ *     tags: [Dashboard]
  *     responses:
  *       200:
  *         description: List of diagnostic codes
@@ -17,10 +18,11 @@ router.get("/diagnostic-codes", dashboardController.fetchDiagnosticCodes);
 // Predict readmission and survival probabilities
 /**
  * @swagger
- * /predict:
+ * /api/dashboard/predict:
  *   post:
  *     summary: Predict Readmission and Survival Probabilities
  *     description: This endpoint predicts readmission and survival probabilities based on patient data.
+ *     tags: [Dashboard]
  *     requestBody:
  *       required: true
  *       content:
