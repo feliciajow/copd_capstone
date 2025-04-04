@@ -126,20 +126,20 @@
       display: flex;
       align-items: center;
     }
-    .selected-code button {
+    /* .selected-code button {
       margin-left: 8px;
       border: none;
       background: none;
       cursor: pointer;
       color: red;
-    }
-    
+    } */
+
     .predict-btn {
       font-size: 16px; 
       font-weight: bold;
       background-color:#29b6f6;
       color: white;
-      margin-top: 20px;
+      margin-top: 10px;
       border: none;
       /* padding: 12px 25px; */
       border-radius: 10px;
@@ -149,7 +149,6 @@
     }
   
     /* Chart section */
-    /* Adjust chart sizes */
     .chart {
       width: 100%; /* Match width of the form */
       max-width: 800px; /* Prevent excessive stretching */

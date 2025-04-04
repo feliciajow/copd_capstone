@@ -28,7 +28,6 @@ const Dashboard = ({ email }) => {
     const [visible, setVisible] = useState(false); // State to manage the visibility of the modal
     const [checkedCodes, setCheckedCodes] = useState(selectedCodes); // Local state for checked codes
 
-
     useEffect(() => {
         loadICDCodesFromFile();
         console.log("Email in Dashboard:", email);
@@ -434,7 +433,7 @@ const Dashboard = ({ email }) => {
                             {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
 
                             <h2>Diagnostic Codes</h2>
-                                <button className="predict-btn" style={{ backgroundColor:"#29b6f6", color:"white"}}onClick={openModal} type="primary">Select Diagnostic Codes</button>
+                                <button className="predict-btn" style={{ backgroundColor:"#fbfbfb", color:"black"}}onClick={openModal} type="primary">Select Diagnostic Codes</button>
 
                                 {/* Modal for Diagnostic Codes */}
                                 <Modal
@@ -537,6 +536,8 @@ const Dashboard = ({ email }) => {
                                                 title: { text: 'Time (Days)', font: { size: 17 } },
                                                 showgrid: true,
                                                 zeroline: true,
+                                                dtick: 30,
+                                                tickmode: 'linear'
                                             },
                                             yaxis: {
                                                 title: { text: 'Readmission Probability', font: { size: 17 } },
