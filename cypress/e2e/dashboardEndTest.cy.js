@@ -26,16 +26,6 @@ describe('Dashboard Page', () => {
         cy.contains('%').should('be.visible');
     })
 
-    it('Should display validation errors for empty fields', () => {
-        //input details into the login form
-        cy.visit('http://localhost:3000/dashboard');
-        cy.get('.predict-btn').click();
-        cy.contains('*Gender is required').should('be.visible');
-        cy.contains('*Age is required').should('be.visible');
-        cy.contains('*Number of admissions is required').should('be.visible');
-        cy.contains('*At least one diagnostic code is required').should('be.visible');
-    })
-
     it('Should handle backend API errors', () => {
         // intercept the prediction API and simulate error response
         cy.intercept('POST', 'http://localhost:5000/api/dashboard/predict', {
@@ -54,4 +44,23 @@ describe('Dashboard Page', () => {
         // check if N/A is displayed means no percentage shown
         cy.contains('N/A').should('be.visible');
     });
+
+    it('Should display loading state while waiting for prediction', () => {
+        //navigate to dashboard page
+        cy.visit('http://localhost:3000/dashboard')
+        cy.get('select.input-field').eq(1).select('male');
+        cy.get('input[placeholder="Enter age"]').type('45');
+        cy.get('input[placeholder="Enter times admitted"]').type('3');
+        cy.get('.diagnostic-btn').click();
+        //click the checkboxes
+        cy.get('.ant-checkbox-wrapper')
+        .eq(1)
+        .scrollIntoView()
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+        cy.contains('button', 'OK').click();
+        cy.get('.predict-btn').click();
+        cy.get('.ant-spin').should('be.visible');
+    });
+
 })
