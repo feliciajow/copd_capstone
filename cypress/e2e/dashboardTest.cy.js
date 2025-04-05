@@ -11,7 +11,7 @@ describe('Dashboard Page', () => {
         cy.get('select.input-field').eq(1).select('male');
         cy.get('input[placeholder="Enter age"]').type('45');
         cy.get('input[placeholder="Enter times admitted"]').type('3');
-        cy.get('select.input-field').last().select(1);
+        cy.get('.diagnostic-btn').click();
         cy.get('.predict-btn').click();
         //show percentage in the dashboard box
         cy.contains('%').should('be.visible');
@@ -39,7 +39,7 @@ describe('Dashboard Page', () => {
         cy.get('select.input-field').eq(1).select('male');
         cy.get('input[placeholder="Enter age"]').type('45');
         cy.get('input[placeholder="Enter times admitted"]').type('3');
-        cy.get('select.input-field').last().select(1);
+        cy.get('.diagnostic-btn').click();
         cy.get('.predict-btn').click();
         cy.get('.loading').should('be.visible');
         cy.contains('Please wait patiently and do not leave the page...').should('be.visible');

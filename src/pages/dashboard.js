@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tooltip, message, Row, Col, Modal, Button, Checkbox } from 'antd';
+import { Tooltip, message, Row, Col, Modal, Button, Checkbox, Input, Space } from 'antd';
 import axios from "axios";
 import '../styles/dashboard.css';
 import '../styles/style.css';
@@ -27,12 +27,49 @@ const Dashboard = ({ email }) => {
     const [diagnosticOptions, setDiagnosticOptions] = useState([]);
     const [visible, setVisible] = useState(false); // State to manage the visibility of the modal
     const [checkedCodes, setCheckedCodes] = useState(selectedCodes); // Local state for checked codes
+    const { Search } = Input;
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         loadICDCodesFromFile();
         console.log("Email in Dashboard:", email);
         fetchModels();
     }, [email]);
+
+    useEffect(() => {
+        if (diagnosticOptions.length > 0) {
+            setFilteredOptions(diagnosticOptions);
+        }
+    }, [diagnosticOptions]);
+
+    //search function to filter based on the domains,codes and description
+    const onSearch = (value) => {
+        setSearch(value);
+        const lowerValue = value.toLowerCase();
+        const filtered = diagnosticOptions.map((group)=>
+        {
+            const matchCodes = group.codes.filter((code)=>
+            {
+                const codeStr = code.code.toLowerCase();
+                const descStr = getDiagnosticDescription(code.code).toLowerCase();
+                const domainStr = group.domain.toLowerCase();
+                return (
+                    codeStr.includes(lowerValue) ||
+                    descStr.includes(lowerValue) ||
+                    domainStr.includes(lowerValue)
+                );
+            });
+            if (matchCodes.length > 0)
+            {
+                return {domain:group.domain, codes:matchCodes};
+            }
+            return null;
+        })
+        .filter((group) => group !== null);
+    setFilteredOptions(filtered);
+    };
+
 
     // Fetch trained models from backend
     const fetchModels = () => {
@@ -433,7 +470,7 @@ const Dashboard = ({ email }) => {
                             {errors.timesAdmitted && <p className="error-message">{errors.timesAdmitted}</p>}
 
                             <h2>Diagnostic Codes</h2>
-                                <button className="predict-btn" style={{ backgroundColor:"#fbfbfb", color:"black"}}onClick={openModal} type="primary">Select Diagnostic Codes</button>
+                                <button className="diagnostic-btn" style={{ backgroundColor:"#fbfbfb", color:"black"}}onClick={openModal} type="primary">Select Diagnostic Codes</button>
 
                                 {/* Modal for Diagnostic Codes */}
                                 <Modal
@@ -448,10 +485,11 @@ const Dashboard = ({ email }) => {
                                         <Button key="submit" type="primary" onClick={handleOk}>OK</Button>
                                     ]}
                                 >
+                                    <Search placeholder="Search filter based on diagnostic category/code/description" allowClear onChange={(e)=> onSearch(e.target.value)} style={{ width: 600 }} />
                                     <Checkbox.Group style={{ width: '100%' }} value={checkedCodes} onChange={handleCheckboxChange}>
                                         <Row gutter={[16, 16]}>
-                                            {diagnosticOptions.length > 0 ? (
-                                                diagnosticOptions.map((group, index) => (
+                                            {filteredOptions.length > 0 ? (
+                                                filteredOptions.map((group, index) => (
                                                     <Col span={12} key={index}>
                                                         <h3>{group.domain}</h3> {/* Display the domain name */}
                                                         <div className="checkbox-group">
