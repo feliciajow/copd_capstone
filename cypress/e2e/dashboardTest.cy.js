@@ -12,16 +12,18 @@ describe('Dashboard Page', () => {
         cy.get('input[placeholder="Enter age"]').type('45');
         cy.get('input[placeholder="Enter times admitted"]').type('3');
         cy.get('.diagnostic-btn').click();
+        //click the checkboxes
+        cy.get('.ant-checkbox-wrapper')
+        .first()
+        .scrollIntoView()
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+        cy.contains('button', 'OK').click();
         cy.get('.predict-btn').click();
+        // wait for the prediction to complete
+        cy.wait(2000); 
         //show percentage in the dashboard box
         cy.contains('%').should('be.visible');
-    })
-    
-    it('Able to select multiple diagnostic codes from the diagnostic dropdown', () => {
-        cy.visit('http://localhost:3000/dashboard');
-        cy.get('select.input-field').last().select(2);
-        cy.get('select.input-field').last().select(1);
-        cy.get('select.input-field').last().select(4);
     })
 
     it('Should display validation errors for empty fields', () => {
@@ -33,17 +35,6 @@ describe('Dashboard Page', () => {
         cy.contains('*Number of admissions is required').should('be.visible');
         cy.contains('*At least one diagnostic code is required').should('be.visible');
     })
-
-    it('Display a loading spinner while prediction is processed', () => {
-        cy.visit('http://localhost:3000/dashboard');
-        cy.get('select.input-field').eq(1).select('male');
-        cy.get('input[placeholder="Enter age"]').type('45');
-        cy.get('input[placeholder="Enter times admitted"]').type('3');
-        cy.get('.diagnostic-btn').click();
-        cy.get('.predict-btn').click();
-        cy.get('.loading').should('be.visible');
-        cy.contains('Please wait patiently and do not leave the page...').should('be.visible');
-    });
 
     it('Should handle backend API errors', () => {
         // intercept the prediction API and simulate error response

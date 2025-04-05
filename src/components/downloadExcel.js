@@ -8,7 +8,8 @@ const ExcelTemplate=() =>{
     const downloadExcel = () => {
         //create column headers
         const headers = [
-            ["Admit/Visit Date/Time", "Date of Birth", "Gender", "Race", "Death Date", "Case Type Description", "Primary Diagnosis Code (Mediclaim)", "Secondary Diagnosis Code Concat (Mediclaim)", "Discharge Date/Time", "Patient ID"]
+            ["Admit/Visit Date/Time", "Date of Birth", "Gender", "Race", "Death Date", "Case Type Description", "Primary Diagnosis Code (Mediclaim)", "Secondary Diagnosis Code Concat (Mediclaim)", "Discharge Date/Time", "Patient ID"],
+            ["21/1/2019  5:07:00 pm", "4/7/1937  12:00:00 am", "FEMALE", "Chinese", "10/5/2022  11:59:00 pm", "A&E", "J44", "Y431||B002", "15/2/2019  1:14:00 pm", "A1234567"]
         ];
         const worksheet = excel.utils.aoa_to_sheet(headers);
         //create new excel workbook

@@ -449,6 +449,7 @@ const Dashboard = ({ email }) => {
                             <div className="input-container">
                                 <input
                                     className="input-field"
+                                    min={0}
                                     type="number"
                                     value={age}
                                     onChange={(e) => setAge(e.target.value)}
