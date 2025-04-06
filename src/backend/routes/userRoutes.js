@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-
+const { authenticateToken } = require("../middleware/authMiddleware");
 /**
  * @swagger
  * /api/users/register:
@@ -99,6 +99,9 @@ router.post("/register", userController.registerUser);
 // user login
 router.post("/loggedin", userController.loginUser);
 
+
+// refresh token
+router.post("/refreshAccessToken", userController.refreshAccessToken);
 /**
  * @swagger
  * /api/users/forgotpwd:
@@ -199,5 +202,6 @@ router.post("/resetpwd", userController.resetpwd);
 
 // retrieve models belonging to all users
 router.get("/model", userController.model);
+router.get("/logout", userController.logoutUser);
 
 module.exports = router;

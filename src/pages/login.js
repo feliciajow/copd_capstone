@@ -35,8 +35,9 @@ const Login = ({ handleLogin }) => {
         }
         return response.json();
       })
-      .then(() => {
+      .then((data) => {
         console.log('Success:', values);
+        localStorage.setItem("accessToken", data.accessToken);
         handleLogin(values.email);
         navigate('/dashboard', { state: { email: values.email } });
       })

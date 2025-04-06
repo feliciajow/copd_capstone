@@ -1,3 +1,6 @@
+require('dotenv').config();
+console.log(process.env.ACCESS_TOKEN_SECRET);
+console.log(process.env.REFRESH_TOKEN_SECRET);
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -9,6 +12,8 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 app.use(cors());
 app.use(bodyParser.json());

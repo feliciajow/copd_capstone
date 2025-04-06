@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt");
 const pool = require("../utils/database");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const { access } = require("fs");
 
 // Register a new user
 async function registerUser(req, res) {
@@ -43,14 +45,43 @@ async function loginUser(req, res) {
         const trimhashpwd = user.hashpassword.trim();
         //compare the plaintext password in login to the hashed password in db
         const comparepwd = await bcrypt.compare(trimpwd, trimhashpwd);
-        if (comparepwd) {
-            return res.status(200).json({ message: 'Login successful.' });
-        }
-        else {
+        console.log("Compare Password",comparepwd);
+        if (!comparepwd) {
             return res.status(401).json({ error: 'Account exist but incorrect password.' });
         }
+        //generate access token (short-lived)
+        const accessToken = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+
+        //generate refresh token (long-lived)
+        const refreshToken = jwt.sign({ email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+        console.log("Tokens",process.env.REFRESH_TOKEN_SECRET, process.env.ACCESS_TOKEN_SECRET);
+        //store refresh token in HTTP-only cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false, // Set to true in production but false for localhost
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        });
+        console.log("Login successful, token generated.");
+        return res.status(200).json({ message: 'Login successful.',accessToken });
     } catch (error) {
         return res.status(500).json({ error: 'An error has occured.' });
+    }
+}
+
+//refresh access tokens
+async function refreshAccessToken(req, res) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+        return res.status(401).json({ error: 'Refresh token not found.' });
+    }
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const newAccessToken = jwt.sign({ email: decoded.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        return res.status(200).json({ accessToken: newAccessToken });
+    }
+    catch (error) {
+        return res.status(403).json({ error: 'Invalid refresh token.' });
     }
 }
 
@@ -144,10 +175,21 @@ async function model(req, res) {
     }
 };
 
+async function logoutUser(req, res) {
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: false, // Set to true in production
+        sameSite: 'strict',
+    });
+    return res.status(200).json({ message: 'Logged out successfully.' });
+}
+
 module.exports = {
     registerUser,
     loginUser,
+    refreshAccessToken,
     forgotpwd,
     resetpwd,
+    logoutUser,
     model,
 };

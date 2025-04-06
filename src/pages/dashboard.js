@@ -30,6 +30,8 @@ const Dashboard = ({ email }) => {
     const { Search } = Input;
     const [filteredOptions, setFilteredOptions] = useState([]);
     const [search, setSearch] = useState('');
+    const [deathresultVisible, setDeathResultVisible] = useState(true);
+    const [readmresultVisible, setreadmResultVisible] = useState(true);
 
     useEffect(() => {
         loadICDCodesFromFile();
@@ -137,6 +139,16 @@ const Dashboard = ({ email }) => {
         }
         fetchDiagnosticCodes();
     }, []);
+
+    //handle hide death result
+    const handleDeathClick = () => {
+        setDeathResultVisible(!deathresultVisible);
+    }
+
+    //handle hide readmission result
+    const handleReadmissionClick = () => {
+        setreadmResultVisible(!readmresultVisible);
+    }
 
     const handleModelChange = (e) => {
         if (email) {
@@ -378,15 +390,29 @@ const Dashboard = ({ email }) => {
                                 <Tooltip title="Estimated Readmission Probability over 30 and 60 days" placement="top">
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
+                                <br/>
+                                {(prediction?.readmission_30_day || prediction?.readmission_60_day) && (
+                                    <Button onClick={handleReadmissionClick}>
+                                        {readmresultVisible ? "Hide Readmission Results" : "Show Readmission Results"}
+                                    </Button>
+                                )}
                             </h3>
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>30 days</h3>
-                                    <p>{prediction?.readmission_30_day ? `${(prediction.readmission_30_day * 100).toFixed(1)}%` : "N/A"}</p>
+                                    <p>{
+                                    readmresultVisible
+                                        ? prediction?.readmission_30_day
+                                        ? `${(prediction.readmission_30_day * 100).toFixed(1)}%`: "N/A": "**%"
+                                    }</p>
                                 </div>
                                 <div className="probability">
                                     <h3>60 days</h3>
-                                    <p>{prediction?.readmission_60_day ? `${(prediction.readmission_60_day * 100).toFixed(1)}%` : "N/A"}</p>
+                                    <p>{
+                                    readmresultVisible
+                                        ? prediction?.readmission_60_day
+                                        ? `${(prediction.readmission_60_day * 100).toFixed(1)}%`: "N/A": "**%"
+                                    }</p>
                                 </div>
                             </div>
                         </div>
@@ -397,15 +423,31 @@ const Dashboard = ({ email }) => {
                                 <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
+                                <br/>
+                                {(prediction?.death_6_month || prediction?.death_12_month) && (
+                                        <Button onClick={handleDeathClick}>
+                                            {deathresultVisible ? "Hide Death Results" : "Show Death Results"}
+                                        </Button>
+                                )}
                             </h3>
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>6 month</h3>
-                                    <p>{(prediction?.death_6_month) ? `${(100 - (prediction.death_6_month * 100)).toFixed(1)}%` : "N/A"}</p>
+                                    <p>{
+                                    deathresultVisible
+                                        ? prediction?.death_6_month
+                                        ? `${(100 - prediction.death_6_month * 100).toFixed(1)}%`: "N/A": "**%"
+                                    }</p>
+
                                 </div>
                                 <div className="probability">
                                     <h3>12 month</h3>
-                                    <p>{prediction?.death_12_month ? `${(100 - (prediction.death_12_month * 100)).toFixed(1)}%` : "N/A"}</p>
+                                    <p>{
+                                    deathresultVisible
+                                        ? prediction?.death_12_month
+                                        ? `${(100 - prediction.death_12_month * 100).toFixed(1)}%`: "N/A": "**%"
+                                    }</p>
+
                                 </div>
                             </div>
                         </div>
