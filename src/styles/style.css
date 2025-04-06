@@ -14,7 +14,8 @@
 
 .login-left, .signup-left {
     background: url('../../public/lung_new.png') no-repeat;
-    background-size: 80%;
+    background-size: 70%;
+    background-position: center top;
  }
 
 /* retrain styling */

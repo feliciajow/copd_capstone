@@ -24,8 +24,8 @@ const Login = ({ handleLogin }) => {
   const onFinish = (values) => {
     fetch('http://localhost:5000/api/users/loggedin', {
       method: 'POST',
-      headers: { "Content-Type": "application/json" }, //telling server the type of content that we are sending with this req
-      body: JSON.stringify({ email: values.email, password: values.password }), //actual content email and password
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: values.email, password: values.password }),
     })
       .then((response) => {
         if (!response.ok) {

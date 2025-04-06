@@ -392,7 +392,7 @@ const Dashboard = ({ email }) => {
                                 </Tooltip>
                                 <br/>
                                 {(prediction?.readmission_30_day || prediction?.readmission_60_day) && (
-                                    <Button onClick={handleReadmissionClick}>
+                                    <Button className="resultbtn"onClick={handleReadmissionClick}>
                                         {readmresultVisible ? "Hide Readmission Results" : "Show Readmission Results"}
                                     </Button>
                                 )}
@@ -425,7 +425,7 @@ const Dashboard = ({ email }) => {
                                 </Tooltip>
                                 <br/>
                                 {(prediction?.death_6_month || prediction?.death_12_month) && (
-                                        <Button onClick={handleDeathClick}>
+                                        <Button className="resultbtn" onClick={handleDeathClick}>
                                             {deathresultVisible ? "Hide Death Results" : "Show Death Results"}
                                         </Button>
                                 )}

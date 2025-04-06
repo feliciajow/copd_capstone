@@ -63,4 +63,46 @@ describe('Dashboard Page', () => {
         cy.get('.ant-spin').should('be.visible');
     });
 
+    it('Should hide result buttons appear after making predictions', () => {
+        //navigate to dashboard page
+        cy.visit('http://localhost:3000/dashboard')
+        cy.get('select.input-field').eq(1).select('male');
+        cy.get('input[placeholder="Enter age"]').type('45');
+        cy.get('input[placeholder="Enter times admitted"]').type('3');
+        cy.get('.diagnostic-btn').click();
+        //click the checkboxes
+        cy.get('.ant-checkbox-wrapper')
+        .eq(1)
+        .scrollIntoView()
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+        cy.contains('button', 'OK').click();
+        cy.get('.predict-btn').click();
+        cy.get('.ant-spin').should('be.visible');
+        cy.wait(2000);
+        cy.get('.resultbtn').should('be.visible');
+    });
+
+    it('Should not see the percentages after clicking on hide button', () => {
+        //navigate to dashboard page
+        cy.visit('http://localhost:3000/dashboard')
+        cy.get('select.input-field').eq(1).select('male');
+        cy.get('input[placeholder="Enter age"]').type('45');
+        cy.get('input[placeholder="Enter times admitted"]').type('3');
+        cy.get('.diagnostic-btn').click();
+        //click the checkboxes
+        cy.get('.ant-checkbox-wrapper')
+        .eq(1)
+        .scrollIntoView()
+        .find('input[type="checkbox"]')
+        .check({ force: true });
+        cy.contains('button', 'OK').click();
+        cy.get('.predict-btn').click();
+        cy.get('.ant-spin').should('be.visible');
+        cy.wait(2000);
+        cy.get('.resultbtn').should('be.visible');
+        cy.get('.resultbtn').first().click();
+        cy.contains('**').should('exist');
+    });
+
 })

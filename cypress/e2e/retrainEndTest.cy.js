@@ -29,5 +29,5 @@ describe('Retrain file Page', () => {
     cy.visit('http://localhost:3000/retrain')
     cy.get('input[type="file"]').should('not.exist');
     cy.get('button').contains('Upload File').should('not.exist');
-  })
-})
+  });
+});

@@ -175,14 +175,6 @@ async function model(req, res) {
     }
 };
 
-async function logoutUser(req, res) {
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: false, // Set to true in production
-        sameSite: 'strict',
-    });
-    return res.status(200).json({ message: 'Logged out successfully.' });
-}
 
 module.exports = {
     registerUser,
@@ -190,6 +182,5 @@ module.exports = {
     refreshAccessToken,
     forgotpwd,
     resetpwd,
-    logoutUser,
     model,
 };

@@ -202,6 +202,5 @@ router.post("/resetpwd", userController.resetpwd);
 
 // retrieve models belonging to all users
 router.get("/model", userController.model);
-router.get("/logout", userController.logoutUser);
 
 module.exports = router;
