@@ -160,6 +160,9 @@ const Models = ({ email }) => {
                             </Col>
                         </Row>
                         <Row>
+                            <Col span={4}>
+                                <h3 style={{textAlign:"left"}}>Filter by Model Creation Date:</h3>
+                            </Col>
                             <Col span={8}>
                                 <RangePicker
                                     picker="month"
