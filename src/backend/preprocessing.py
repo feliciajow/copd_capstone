@@ -493,7 +493,7 @@ def train():
         "read_model": readmission_rsf
     })
 
-    expire_date = datetime.now() + timedelta(days=30)
+    expire_date = datetime.now() + timedelta(minutes=5)
 
     compressed_models_binary = gzip.compress(combined_models_binary)  # Compress the data
     

@@ -162,6 +162,7 @@ async function model(req, res) {
         return res.status(400).json({ error: 'Email is required.' });
     }
     try {
+        await pool.query('DELETE FROM models WHERE expire_date < NOW()');
         const result = await pool.query(
             `Select m.modelid, m.model_name, m.c_index, m.timestamp, m.expire_date 
             From models m`
@@ -182,5 +183,5 @@ module.exports = {
     refreshAccessToken,
     forgotpwd,
     resetpwd,
-    model,
+    model
 };
