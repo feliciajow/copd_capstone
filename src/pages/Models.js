@@ -117,7 +117,7 @@ const Models = ({ email }) => {
             title: (
                 <>
                     Expiration Date{' '}
-                    <Tooltip title="Model expires in one month" placement="top">
+                    <Tooltip title="Model Expiration Date" placement="top">
                         <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                     </Tooltip>
                 </>
@@ -170,18 +170,20 @@ const Models = ({ email }) => {
                             </Col>
                         </Row>
                         <Row style={{ background: 'transparent', border: "transparent" }}>
-                            <Table
-                                columns={columns}
-                                dataSource={filteredModels}
-                                rowKey="modelid"
-                                loading={loading}
-                                scroll={{ x: 1500 }}
-                                sortMultiple={true}
-                                pagination={{
-                                    pageSize: 10,
-                                    showTotal: (total) => `Total ${total} models`,
-                                }}
-                            />
+                            <Col span={24}>
+                                <Table
+                                    columns={columns}
+                                    dataSource={filteredModels}
+                                    rowKey="modelid"
+                                    loading={loading}
+                                    scroll={{ x: 1500 }}
+                                    sortMultiple={true}
+                                    pagination={{
+                                        pageSize: 10,
+                                        showTotal: (total) => `Total ${total} models`,
+                                    }}
+                                />
+                            </Col>
                         </Row>
                     </div>
                 </>
