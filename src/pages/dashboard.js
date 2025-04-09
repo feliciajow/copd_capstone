@@ -30,8 +30,8 @@ const Dashboard = ({ email }) => {
     const { Search } = Input;
     const [filteredOptions, setFilteredOptions] = useState([]);
     const [search, setSearch] = useState('');
-    const [deathresultVisible, setDeathResultVisible] = useState(true);
-    const [readmresultVisible, setreadmResultVisible] = useState(true);
+    const [deathresultVisible, setDeathResultVisible] = useState(false);
+    const [readmresultVisible, setreadmResultVisible] = useState(false);
 
     useEffect(() => {
         loadICDCodesFromFile();
@@ -400,19 +400,19 @@ const Dashboard = ({ email }) => {
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>30 days</h3>
-                                    <p>{
-                                    readmresultVisible
-                                        ? prediction?.readmission_30_day
-                                        ? `${(prediction.readmission_30_day * 100).toFixed(1)}%`: "N/A": "**%"
+                                    <p>{!prediction 
+                                        ? "N/A" 
+                                        : (readmresultVisible 
+                                            ? `${(prediction.readmission_30_day * 100).toFixed(1)}%` 
+                                            : "**%")
                                     }</p>
                                 </div>
                                 <div className="probability">
                                     <h3>60 days</h3>
-                                    <p>{
-                                    readmresultVisible
-                                        ? prediction?.readmission_60_day
-                                        ? `${(prediction.readmission_60_day * 100).toFixed(1)}%`: "N/A": "**%"
-                                    }</p>
+                                    <p>{!prediction? "N/A":
+                                    (readmresultVisible
+                                        ? `${(prediction.readmission_60_day * 100).toFixed(1)}%`: "**%"
+                                    )}</p>
                                 </div>
                             </div>
                         </div>
@@ -433,20 +433,18 @@ const Dashboard = ({ email }) => {
                             <div className="metric-cards">
                                 <div className="probability">
                                     <h3>6 month</h3>
-                                    <p>{
-                                    deathresultVisible
-                                        ? prediction?.death_6_month
-                                        ? `${(100 - prediction.death_6_month * 100).toFixed(1)}%`: "N/A": "**%"
-                                    }</p>
+                                    <p>{!prediction? "N/A":
+                                    (deathresultVisible
+                                        ? `${(100 - prediction.death_6_month * 100).toFixed(1)}%`: "**%"
+                                    )}</p>
 
                                 </div>
                                 <div className="probability">
                                     <h3>12 month</h3>
-                                    <p>{
-                                    deathresultVisible
-                                        ? prediction?.death_12_month
-                                        ? `${(100 - prediction.death_12_month * 100).toFixed(1)}%`: "N/A": "**%"
-                                    }</p>
+                                    <p>{!prediction? "N/A":
+                                    (deathresultVisible
+                                        ? `${(100 - prediction.death_12_month * 100).toFixed(1)}%`: "**%"
+                                    )}</p>
 
                                 </div>
                             </div>
