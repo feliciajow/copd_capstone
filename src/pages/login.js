@@ -88,12 +88,12 @@ const Login = ({ handleLogin }) => {
   };
 
   return (
-    <div className="login-container" style={{ padding: "60px" }}>
+    <div className="login-container">
       {alert}
-      <div className="login-card">
-        <Row style={{ height: '65vh' }}>
-          <Col span={1}></Col>
-          <Col span={13}>
+        <Row style={{ height: '100%' }}>
+          <Col span={14} className='login-left' style={{ height: '100%', padding: 0 }}>
+          </Col>
+          <Col span={10} style={{padding:"6%", marginTop:"4%"}}>
             <Row>
               <h1 style={{ fontSize: "30px" }}>Welcome Back</h1>
             </Row>
@@ -189,9 +189,8 @@ const Login = ({ handleLogin }) => {
               </Form.Item>
             </Form>
           </Col>
-          <Col span={9} className='login-left'></Col>
+          
         </Row>
-      </div>
       <Modal open={isModalOpen} footer={null} onCancel={handleCancel} maskClosable={false}>
         <Result
           title="Forgot Password"
@@ -221,12 +220,10 @@ const Login = ({ handleLogin }) => {
                 </Button>
               </Form.Item>
             </Form>
-
           ]}
         />
       </Modal>
     </div>
-
   );
 };
 

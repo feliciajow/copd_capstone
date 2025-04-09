@@ -9,15 +9,16 @@
 }
 
 .login-card,.signup-card{
-    margin-top:6%;
+    margin-top: 6%;
 }
 
 .login-left, .signup-left {
-    background: url('../../public/lung_new.png') no-repeat;
-    background-size: 70%;
-    background-position: center top;
- }
-
+    min-height: 100vh;
+    background: url('../../public/WebApp.png') no-repeat center center;
+    /* background-position: center top; */
+    background-size: cover;
+}
+  
 /* retrain styling */
 .ant-upload-drag {
     background-color: #f9fbfd;

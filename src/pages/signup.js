@@ -40,12 +40,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container" style={{ padding: "60px" }}>
+    <div className="signup-container">
       {alert}
-      <div className="signup-card">
-        <Row style={{ height: '65vh' }}>
-          <Col span={1}></Col>
-          <Col span={13}>
+        <Row style={{ height: '100%' }}>
+          <Col span={14} className='signup-left' style={{ height: '100%', padding: 0 }}></Col>
+          <Col span={10} style={{padding:"6%", marginTop:"4%"}}>
             <Row>
               <h1 style={{fontsize:"30px"}}>Create An Account</h1>
             </Row>
@@ -154,10 +153,8 @@ const Signup = () => {
               </Form.Item>
             </Form>
           </Col>
-          <Col span={9} className='signup-left'></Col>
         </Row>
 
-      </div>
     </div>
   )
 };
