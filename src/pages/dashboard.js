@@ -160,7 +160,9 @@ const Dashboard = ({ email }) => {
 
     // Handle checkbox selection in modal
     const handleCheckboxChange = (checkedValues) => {
-        setCheckedCodes(checkedValues);
+        //merge newly selected values with prev selected ones
+        const updatedCheckedCodes = [...new Set([...checkedCodes, ...checkedValues])];
+        setCheckedCodes(updatedCheckedCodes);
     };
 
     // Open modal for diagnostic code selection
@@ -390,10 +392,9 @@ const Dashboard = ({ email }) => {
                                 <Tooltip title="Estimated Readmission Probability over 30 and 60 days" placement="top">
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
-                                <br/>
                                 {(prediction?.readmission_30_day || prediction?.readmission_60_day) && (
-                                    <Button className="resultbtn"onClick={handleReadmissionClick}>
-                                        {readmresultVisible ? "Hide Readmission Results" : "Show Readmission Results"}
+                                    <Button className="resultbtn" style={{marginLeft:'5%'}} onClick={handleReadmissionClick}>
+                                        {readmresultVisible ? "Hide" : "Show"}
                                     </Button>
                                 )}
                             </h3>
@@ -423,10 +424,9 @@ const Dashboard = ({ email }) => {
                                 <Tooltip title="Estimated Survival Probability over 6 and 12 months" placement="top">
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
-                                <br/>
                                 {(prediction?.death_6_month || prediction?.death_12_month) && (
-                                        <Button className="resultbtn" onClick={handleDeathClick}>
-                                            {deathresultVisible ? "Hide Death Results" : "Show Death Results"}
+                                        <Button className="resultbtn" style={{marginLeft:'5%'}} onClick={handleDeathClick}>
+                                            {deathresultVisible ? "Hide" : "Show"}
                                         </Button>
                                 )}
                             </h3>
