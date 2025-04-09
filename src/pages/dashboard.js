@@ -393,7 +393,7 @@ const Dashboard = ({ email }) => {
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
                                 {(prediction?.readmission_30_day || prediction?.readmission_60_day) && (
-                                    <Button className="resultbtn" style={{marginLeft:'5%'}} onClick={handleReadmissionClick}>
+                                    <Button className="resultbtn" style={{marginLeft:'5%'}} shape="circle" onClick={handleReadmissionClick}>
                                         {readmresultVisible ? "Hide" : "Show"}
                                     </Button>
                                 )}
@@ -425,7 +425,7 @@ const Dashboard = ({ email }) => {
                                     <InfoCircleOutlined style={{ fontSize: '17px', color: '#1890ff' }} />
                                 </Tooltip>
                                 {(prediction?.death_6_month || prediction?.death_12_month) && (
-                                        <Button className="resultbtn" style={{marginLeft:'5%'}} onClick={handleDeathClick}>
+                                        <Button className="resultbtn" style={{marginLeft:'5%'}} shape="circle" onClick={handleDeathClick}>
                                             {deathresultVisible ? "Hide" : "Show"}
                                         </Button>
                                 )}
