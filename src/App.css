@@ -10,6 +10,10 @@ body{
   overflow-y: auto;
 }
 
+body::-webkit-scrollbar {
+  display: none;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;

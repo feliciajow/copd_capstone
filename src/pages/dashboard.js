@@ -159,10 +159,13 @@ const Dashboard = ({ email }) => {
     };
 
     // Handle checkbox selection in modal
+    // const handleCheckboxChange = (checkedValues) => {
+    //     //merge newly selected values with prev selected ones
+    //     const updatedCheckedCodes = [...new Set([...checkedCodes, ...checkedValues])];
+    //     setCheckedCodes(updatedCheckedCodes);
+    // };
     const handleCheckboxChange = (checkedValues) => {
-        //merge newly selected values with prev selected ones
-        const updatedCheckedCodes = [...new Set([...checkedCodes, ...checkedValues])];
-        setCheckedCodes(updatedCheckedCodes);
+        setCheckedCodes(checkedValues);
     };
 
     // Open modal for diagnostic code selection
@@ -529,22 +532,31 @@ const Dashboard = ({ email }) => {
                                     <Search placeholder="Search filter based on diagnostic category/code/description" allowClear onChange={(e)=> onSearch(e.target.value)} style={{ width: 600 }} />
                                     <Checkbox.Group style={{ width: '100%' }} value={checkedCodes} onChange={handleCheckboxChange}>
                                         <Row gutter={[16, 16]}>
-                                            {filteredOptions.length > 0 ? (
-                                                filteredOptions.map((group, index) => (
+                                        {diagnosticOptions.map((group, index) => {
+                                                // Always render codes that match search OR are already checked
+                                                const codesToRender = group.codes.filter(code =>
+                                                    search === '' ||
+                                                    checkedCodes.includes(code.code) ||
+                                                    code.code.toLowerCase().includes(search.toLowerCase()) ||
+                                                    getDiagnosticDescription(code.code).toLowerCase().includes(search.toLowerCase()) ||
+                                                    group.domain.toLowerCase().includes(search.toLowerCase())
+                                                );
+
+                                                if (codesToRender.length === 0) return null;
+
+                                                return (
                                                     <Col span={12} key={index}>
-                                                        <h3>{group.domain}</h3> {/* Display the domain name */}
+                                                        <h3>{group.domain}</h3>
                                                         <div className="checkbox-group">
-                                                            {group.codes.map((code) => (
+                                                            {codesToRender.map((code) => (
                                                                 <Checkbox key={code.code} value={code.code}>
-                                                                    {code.code} - {getDiagnosticDescription(code.code)} {/* Fetch description */}
+                                                                    {code.code} - {getDiagnosticDescription(code.code)}
                                                                 </Checkbox>
                                                             ))}
                                                         </div>
                                                     </Col>
-                                                ))
-                                            ) : (
-                                                <Col span={24}>No diagnostic codes available</Col>
-                                            )}
+                                                );
+                                            })}
                                         </Row>
                                     </Checkbox.Group>
                                 </Modal>
