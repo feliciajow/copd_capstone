@@ -4,6 +4,28 @@ describe('Login Page', () => {
       cy.visit('http://localhost:3000/')
     })
 
+    it('No email should be displayed in the navbar if not login', () => {
+      //load sign up page
+      cy.visit('http://localhost:3000/')
+      cy.get('.email-display').should('not.exist');
+    })
+
+    it('Should display the Login section section', () => {
+      cy.visit('http://localhost:3000/')
+      cy.get('h1').should('contain', 'Welcome Back');
+      //button for refreshing of page
+      cy.get('button').first().click();
+    });
+
+    it('Should display validation messages for empty fields', () => {
+      cy.visit('http://localhost:3000/')
+      // submit the form without filling in any fields
+      cy.get('button[type="submit"]').click();
+      // validation messages
+      cy.contains('Please input your email!').should('be.visible');
+      cy.contains('Please input your password!').should('be.visible');
+    });
+
     it('Should not be able to login if account used to login have not been registered before', () => {
         //navigate to sign up page
         cy.visit('http://localhost:3000/')
