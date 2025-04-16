@@ -15,6 +15,15 @@ describe('Sign Up Page', () => {
     cy.get('button[type="submit"]').click(); 
   })
 
+  it('Should display an error for invalid email format', () => {
+    cy.visit('http://localhost:3000/signup');
+    cy.get('input[name="email"]').type('invalidemail');
+    cy.get('input[name="password"]').type('judy2345');
+    cy.get('input[name="confirmpassword"]').type('judy2345');
+    cy.get('button[type="submit"]').click();
+    cy.contains('Please enter a valid email!').should('be.visible');
+  });
+
   it('It should show validation errors if the same email is used to sign up',()=>{
     cy.visit('http://localhost:3000/signup');
     cy.get('input[name="email"]').type('judy234@example.com') 
